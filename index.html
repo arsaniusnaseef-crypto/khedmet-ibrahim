@@ -1,100 +1,513 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>خدمة إبراهيم الجوهري</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-body{font-family:Tahoma,Arial,sans-serif;background:#f5f7fb}
-.card{background:#fff;border-radius:22px;box-shadow:0 8px 28px rgba(0,0,0,.07)}
+:root{--navy:#142b4a;--navy2:#203e63;--gold:#c9a96e;--bg:#f3f6fa;--ink:#1d2939;--muted:#718096;--line:#e5eaf0;--white:#fff;--red:#b42318}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:Cairo,Tahoma,sans-serif;color:var(--ink)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
 .hidden{display:none!important}
-input,select,textarea{outline:none}
+.shell{max-width:1200px;margin:auto;padding:22px}
+.top{background:var(--navy);color:white;padding:18px 22px;border-radius:18px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-size:22px;font-weight:800}
+.sub{font-size:13px;color:#d4deeb}
+.panel,.stat,.login{background:white;border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 24px #142b4a0b}
+.login{max-width:430px;margin:8vh auto;padding:28px}
+.login h1{text-align:center;color:var(--navy);margin:4px 0}
+.login p{text-align:center;color:var(--muted)}
+label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}
+input,select,textarea{width:100%;border:1px solid #d5dde7;border-radius:11px;padding:11px;background:#fff;color:var(--ink)}
+textarea{min-height:80px;resize:vertical}
+.btn{border:0;border-radius:11px;padding:10px 16px;background:var(--navy);color:white;font-weight:700}
+.btn.light{background:#edf2f7;color:var(--navy)}
+.btn.gold{background:var(--gold);color:#1d2939}
+.btn.danger{background:#fff0ef;color:var(--red)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.login .btn{width:100%;margin-top:18px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}
+.stat{padding:16px}
+.stat small{color:var(--muted)}
+.stat strong{display:block;font-size:26px;color:var(--navy)}
+.layout{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+.panel{padding:18px;margin-bottom:16px}
+.panel h2{font-size:18px;color:var(--navy);margin:0 0 14px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.toolbar input{flex:1;min-width:180px}
+.family{border:1px solid var(--line);border-radius:13px;padding:13px;margin:9px 0;background:#fff}
+.family-head{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.family h3{margin:0;color:var(--navy);font-size:16px}
+.meta{font-size:13px;color:var(--muted);margin-top:5px}
+.pill{display:inline-block;border-radius:30px;padding:3px 9px;background:#edf2f7;color:var(--navy);font-size:12px;margin:3px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.members{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+.member{font-size:13px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.note{background:#fff8e9;padding:10px;border-radius:10px;font-size:13px;margin-top:8px}
+.empty{text-align:center;color:var(--muted);padding:24px}
+.notice{padding:12px;border-radius:10px;background:#fff8e9;color:#76551e;font-size:13px;margin:12px 0}
+.status{font-size:13px;color:#d4deeb}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.foot{text-align:center;color:var(--muted);font-size:12px;padding:15px}
+@media(max-width:800px){
+.stats{grid-template-columns:repeat(2,1fr)}
+.layout{grid-template-columns:1fr}
+.shell{padding:12px}
+.top{border-radius:13px}
+.brand{font-size:18px}
+}
+@media(max-width:420px){
+.row{grid-template-columns:1fr}
+.family-head{align-items:flex-start;flex-direction:column}
+}
 </style>
 </head>
 <body>
-<div id="app"></div>
-<script>
-// لا توجد كلمات مرور ثابتة أو بيانات أسر تجريبية في هذه النسخة.
-// سيتم تفعيل المصادقة والصلاحيات بعد ربط Firebase Authentication وFirestore.
-let families=[];
-let role=null, editing=null;
 
-function renderLogin(){
-app.innerHTML=`<div class="min-h-screen flex items-center justify-center p-5">
-<div class="card w-full max-w-md p-8">
-<div class="text-center mb-8"><div class="text-5xl mb-3">🤝</div>
-<h1 class="text-3xl font-bold text-slate-800">خدمة إبراهيم الجوهري</h1><p class="text-slate-500 mt-2">نظام إدارة ومتابعة الأسر</p></div>
-<label class="block mb-2 font-semibold">اسم المستخدم</label>
-<input id="u" type="text" autocomplete="username" class="w-full border rounded-xl p-3 mb-4" placeholder="اكتبي اسم المستخدم">
-<label class="block mb-2 font-semibold">كلمة المرور</label>
-<input id="p" type="password" class="w-full border rounded-xl p-3 mb-5" placeholder="كلمة المرور">
-<button onclick="login()" class="w-full bg-slate-800 text-white p-3 rounded-xl font-bold">تسجيل الدخول</button>
-<p id="err" class="text-red-600 text-center mt-4"></p>
-</div></div>`;
-}
-function login(){
-  const u=uEl().value.trim(), p=document.getElementById("p").value;
-  if(!u || !p){document.getElementById("err").textContent="من فضلك اكتبي اسم المستخدم وكلمة المرور";return;}
-  document.getElementById("err").textContent="تسجيل الدخول غير مفعّل بعد. يجب ربط Firebase Authentication وإنشاء الحسابات والصلاحيات قبل الاستخدام.";
-}
-function uEl(){return document.getElementById("u")}
-function counts(){
-let c={حضانة:0,ابتدائي:0,إعدادي:0,ثانوي:0,جامعة:0};families.forEach(f=>f.members.forEach(m=>c[m.edu]=(c[m.edu]||0)+1));return c
-}
-function renderDash(username){
-let c=counts(), total=families.reduce((a,f)=>a+f.members.length,0);
-app.innerHTML=`<div class="min-h-screen"><header class="bg-slate-800 text-white p-5"><div class="max-w-6xl mx-auto flex justify-between items-center">
-<div><h1 class="text-2xl font-bold">خدمة إبراهيم الجوهري</h1><p class="text-slate-300">${role.greet}</p></div>
-<button onclick="renderLogin()" class="bg-white/10 px-4 py-2 rounded-xl">خروج</button></div></header>
-<main class="max-w-6xl mx-auto p-5">
-<div class="flex flex-wrap gap-3 mb-6"><button onclick="renderDash('${username}')" class="bg-slate-800 text-white px-5 py-3 rounded-xl">الرئيسية</button>
-<button onclick="renderFamilies()" class="bg-white px-5 py-3 rounded-xl shadow">الأسر</button>
-${role.role==="admin"?`<button onclick="newFamily()" class="bg-white px-5 py-3 rounded-xl shadow">+ إضافة أسرة</button>`:""}
+<div id="loginView" class="shell">
+  <div class="login">
+    <div style="text-align:center;font-size:38px">🤝</div>
+    <h1>خدمة إبراهيم الجوهري</h1>
+    <p>نظام إدارة ومتابعة الأسر</p>
+    <div class="notice">الدخول متاح للحسابات التي ينشئها مسؤول النظام فقط.</div>
+    <label>البريد الإلكتروني</label>
+    <input id="email" type="email" autocomplete="username" placeholder="name@example.com">
+    <label>كلمة المرور</label>
+    <input id="password" type="password" autocomplete="current-password" placeholder="كلمة المرور">
+    <button class="btn" id="loginBtn">تسجيل الدخول</button>
+    <div id="loginError" style="color:#b42318;text-align:center;margin-top:10px"></div>
+  </div>
 </div>
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-7">
-${stat("عدد الأسر",families.length,"🏠")}${stat("إجمالي الأفراد",total,"👨‍👩‍👧‍👦")}
-${stat("عدد العرائس",0,"👰")}${stat("دخل الأسر المسجلة",families.reduce((a,f)=>a+(+f.income||0),0)+" ج","💰")}</div>
-<div class="card p-6"><h2 class="text-xl font-bold mb-5">توزيع أفراد الأسر حسب المرحلة التعليمية</h2>
-<div class="grid grid-cols-2 md:grid-cols-5 gap-4">${Object.entries(c).map(([k,v])=>`<div class="bg-slate-50 rounded-2xl p-5 text-center"><div class="text-slate-500">${k}</div><div class="text-3xl font-bold mt-2">${v}</div></div>`).join("")}</div></div>
-<div class="card p-6 mt-6"><h2 class="text-xl font-bold mb-4">آخر الأسر</h2>${families.slice(-5).reverse().map(f=>familyRow(f)).join("")}</div>
-</main></div>`;
+
+<div id="appView" class="shell hidden">
+  <header class="top">
+    <div>
+      <div class="brand">خدمة إبراهيم الجوهري</div>
+      <div class="sub">نظام إدارة ومتابعة الأسر</div>
+    </div>
+    <div style="text-align:left">
+      <div id="who" class="status"></div>
+      <button class="btn light" id="logoutBtn" style="margin-top:8px">تسجيل الخروج</button>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><small>إجمالي الأسر</small><strong id="familiesCount">0</strong></div>
+    <div class="stat"><small>إجمالي الأفراد</small><strong id="membersCount">0</strong></div>
+    <div class="stat"><small>العرائس</small><strong id="bridesCount">0</strong></div>
+    <div class="stat"><small>إجمالي الدخل الشهري</small><strong id="incomeTotal">0</strong></div>
+  </div>
+
+  <div class="layout">
+    <section class="panel">
+      <h2>قاعدة بيانات الأسر</h2>
+      <div class="toolbar">
+        <input id="search" placeholder="ابحث باسم الأسرة أو الهاتف...">
+        <button class="btn" id="addBtn">+ إضافة أسرة</button>
+      </div>
+      <div id="familyList" class="empty">جارٍ تحميل البيانات...</div>
+    </section>
+
+    <section>
+      <div class="panel">
+        <h2 id="formTitle">بيانات الأسرة</h2>
+        <form id="familyForm">
+          <input type="hidden" id="familyId">
+          <label>اسم الأسرة</label>
+          <input id="familyName" required>
+
+          <div class="row">
+            <div>
+              <label>رقم الهاتف</label>
+              <input id="phone" inputmode="tel">
+            </div>
+            <div>
+              <label>الدخل الشهري</label>
+              <input id="income" type="number" min="0">
+            </div>
+          </div>
+
+          <label>السكن</label>
+          <select id="housing">
+            <option value="">اختاري</option>
+            <option>تمليك</option>
+            <option>إيجار</option>
+            <option>مع الأقارب</option>
+            <option>أخرى</option>
+          </select>
+
+          <label>الاحتياجات</label>
+          <textarea id="needs"></textarea>
+
+          <label>ملاحظات</label>
+          <textarea id="notes"></textarea>
+
+          <h2 style="margin-top:18px">أفراد الأسرة</h2>
+          <div id="memberInputs"></div>
+          <button type="button" class="btn light" id="addMember">+ إضافة فرد</button>
+
+          <div class="actions">
+            <button class="btn" id="saveBtn" type="submit">حفظ الأسرة</button>
+            <button class="btn light" id="cancelBtn" type="button">إلغاء</button>
+          </div>
+          <div id="formError" style="color:#b42318;margin-top:8px"></div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2>توزيع الأفراد حسب المرحلة التعليمية</h2>
+        <div id="educationStats"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="foot">بيانات الخدمة سرية ومخصصة للمستخدمين المصرح لهم فقط.</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+window.FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCsFBKh8rx1fUq_LmbCu7QLwRcY932oJVs",
+  authDomain: "khedmet-ibrahim-el-gawhary.firebaseapp.com",
+  projectId: "khedmet-ibrahim-el-gawhary",
+  storageBucket: "khedmet-ibrahim-el-gawhary.firebasestorage.app",
+  messagingSenderId: "394268209326",
+  appId: "1:394268209326:web:9ad5608291ac153085bd3f"
+};
+</script>
+
+<script>
+const $ = id => document.getElementById(id);
+let auth = null, db = null, currentUser = null, userRole = null, families = [];
+const stages = ['حضانة','ابتدائي','إعدادي','ثانوي','جامعة','دراسات عليا'];
+
+function showLogin(){
+  $('loginView').classList.remove('hidden');
+  $('appView').classList.add('hidden');
 }
-function stat(a,b,i){return `<div class="card p-5"><div class="text-2xl">${i}</div><div class="text-slate-500 mt-2">${a}</div><div class="text-2xl font-bold mt-1">${b}</div></div>`}
-function familyRow(f){return `<div class="border-b last:border-0 py-4 flex justify-between items-center"><div><b>${f.name}</b><div class="text-sm text-slate-500">${f.phone} • ${f.members.length} أفراد</div></div><button onclick="viewFamily(${f.id})" class="px-4 py-2 rounded-xl bg-slate-100">عرض</button></div>`}
-function renderFamilies(){
-app.innerHTML=`<div class="min-h-screen"><header class="bg-slate-800 text-white p-5"><div class="max-w-6xl mx-auto flex justify-between"><div><h1 class="text-2xl font-bold">الأسر</h1><p class="text-slate-300">${role.greet}</p></div><button onclick="renderLogin()" class="bg-white/10 px-4 py-2 rounded-xl">خروج</button></div></header>
-<main class="max-w-6xl mx-auto p-5"><div class="flex gap-3 mb-5"><button onclick="renderFamilies()" class="bg-slate-800 text-white px-5 py-3 rounded-xl">الأسر</button><button onclick="renderDash()" class="bg-white px-5 py-3 rounded-xl shadow">الرئيسية</button>${role.role==="admin"?`<button onclick="newFamily()" class="bg-white px-5 py-3 rounded-xl shadow">+ إضافة أسرة</button>`:""}</div>
-<input id="search" oninput="filterFamilies()" class="w-full border rounded-2xl p-4 mb-5" placeholder="ابحث باسم الأسرة أو رقم الهاتف...">
-<div id="flist" class="card p-5">${families.map(f=>familyRow(f)).join("")}</div></main></div>`;
+function showApp(){
+  $('loginView').classList.add('hidden');
+  $('appView').classList.remove('hidden');
 }
-function filterFamilies(){let q=document.getElementById("search").value.toLowerCase();document.getElementById("flist").innerHTML=families.filter(f=>(f.name+f.phone).toLowerCase().includes(q)).map(f=>familyRow(f)).join("")||"<p class='text-center text-slate-500 p-8'>لا توجد نتائج</p>"}
-function viewFamily(id){
-let f=families.find(x=>x.id===id);
-app.innerHTML=`<main class="max-w-4xl mx-auto p-5"><button onclick="renderFamilies()" class="mb-5">← رجوع</button>
-<div class="card p-7"><div class="flex justify-between gap-3 flex-wrap"><div><h1 class="text-3xl font-bold">${f.name}</h1><p class="text-slate-500 mt-2">${f.phone}</p></div>${role.role==="admin"?`<div class="flex gap-2"><button onclick="editFamily(${f.id})" class="bg-slate-800 text-white px-4 py-2 rounded-xl">تعديل</button><button onclick="deleteFamily(${f.id})" class="bg-red-50 text-red-700 px-4 py-2 rounded-xl">حذف</button></div>`:""}</div>
-<div class="grid md:grid-cols-3 gap-4 my-6"><div class="bg-slate-50 p-4 rounded-xl"><b>الدخل الشهري</b><br>${f.income||"-"} جنيه</div><div class="bg-slate-50 p-4 rounded-xl"><b>السكن</b><br>${f.housing||"-"}</div><div class="bg-slate-50 p-4 rounded-xl"><b>الاحتياج</b><br>${f.need||"-"}</div></div>
-<h2 class="text-xl font-bold mb-3">أفراد الأسرة</h2><div class="overflow-x-auto"><table class="w-full text-right"><thead><tr class="border-b"><th class="p-3">الاسم</th><th class="p-3">السن</th><th class="p-3">المرحلة/المؤهل</th></tr></thead><tbody>${f.members.map(m=>`<tr class="border-b"><td class="p-3">${m.name}</td><td class="p-3">${m.age}</td><td class="p-3">${m.edu}</td></tr>`).join("")}</tbody></table></div>
-<div class="mt-6 bg-slate-50 rounded-xl p-4"><b>ملاحظات</b><p class="mt-2">${f.notes||"لا توجد ملاحظات"}</p></div></div></main>`;
+function configReady(){
+  return window.FIREBASE_CONFIG &&
+    window.FIREBASE_CONFIG.apiKey &&
+    window.FIREBASE_CONFIG.apiKey !== 'PASTE_API_KEY';
 }
-function newFamily(){editFamily(null)}
-function editFamily(id){
-let f=id?families.find(x=>x.id===id):{name:"",phone:"",income:"",housing:"",need:"",notes:"",members:[]};
-editing=id;
-app.innerHTML=`<main class="max-w-4xl mx-auto p-5"><button onclick="${id?"viewFamily("+id+")":"renderFamilies()"}" class="mb-5">← رجوع</button>
-<div class="card p-7"><h1 class="text-2xl font-bold mb-6">${id?"تعديل الأسرة":"إضافة أسرة جديدة"}</h1>
-<div class="grid md:grid-cols-2 gap-4"><input id="name" value="${f.name}" class="border rounded-xl p-3" placeholder="اسم الأسرة"><input id="phone" value="${f.phone}" class="border rounded-xl p-3" placeholder="رقم الهاتف"><input id="income" value="${f.income}" class="border rounded-xl p-3" placeholder="الدخل الشهري"><input id="housing" value="${f.housing}" class="border rounded-xl p-3" placeholder="السكن"><input id="need" value="${f.need}" class="border rounded-xl p-3 md:col-span-2" placeholder="الاحتياج"><textarea id="notes" class="border rounded-xl p-3 md:col-span-2" placeholder="ملاحظات">${f.notes}</textarea></div>
-<h2 class="text-xl font-bold mt-7 mb-3">أفراد الأسرة</h2><div id="members">${f.members.map((m,i)=>memberInput(m,i)).join("")}</div>
-<button onclick="addMember()" class="mt-3 bg-slate-100 px-4 py-2 rounded-xl">+ إضافة فرد</button>
-<button onclick="saveFamily(${id||0})" class="block w-full mt-6 bg-slate-800 text-white p-3 rounded-xl font-bold">حفظ البيانات</button></div></main>`;
+
+function init(){
+  if(!configReady()){
+    $('loginError').textContent='يلزم إعداد ربط Firebase أولًا قبل تسجيل الدخول.';
+    $('loginBtn').disabled=true;
+    return;
+  }
+
+  try{
+    firebase.initializeApp(window.FIREBASE_CONFIG);
+    auth=firebase.auth();
+    db=firebase.firestore();
+
+    auth.onAuthStateChanged(async user=>{
+      if(!user){
+        currentUser=null;
+        showLogin();
+        return;
+      }
+
+      try{
+        const doc=await db.collection('users').doc(user.uid).get();
+
+        if(!doc.exists || !['admin','viewer'].includes(doc.data().role)){
+          await auth.signOut();
+          $('loginError').textContent='هذا الحساب غير مضاف إلى مستخدمي الخدمة.';
+          return;
+        }
+
+        currentUser=user;
+        userRole=doc.data().role;
+        $('who').textContent=(doc.data().displayName||user.email)+' — '+
+          (userRole==='admin'?'مدير النظام':'مشاهدة فقط');
+
+        showApp();
+        setPermissions();
+        listenFamilies();
+
+      }catch(e){
+        $('loginError').textContent='تعذر التحقق من الصلاحيات: '+e.message;
+        await auth.signOut();
+      }
+    });
+
+  }catch(e){
+    $('loginError').textContent='خطأ في إعداد Firebase: '+e.message;
+  }
 }
-function memberInput(m={},i){return `<div class="grid md:grid-cols-4 gap-2 mb-3 member"><input class="border rounded-xl p-3 mn" value="${m.name||""}" placeholder="اسم الفرد"><input class="border rounded-xl p-3 ma" type="number" value="${m.age||""}" placeholder="السن"><select class="border rounded-xl p-3 me"><option ${m.edu==="حضانة"?"selected":""}>حضانة</option><option ${m.edu==="ابتدائي"?"selected":""}>ابتدائي</option><option ${m.edu==="إعدادي"?"selected":""}>إعدادي</option><option ${m.edu==="ثانوي"?"selected":""}>ثانوي</option><option ${m.edu==="جامعة"?"selected":""}>جامعة</option></select><button onclick="this.parentElement.remove()" class="bg-red-50 text-red-700 rounded-xl">حذف</button></div>`}
-function addMember(){document.getElementById("members").insertAdjacentHTML("beforeend",memberInput({},Date.now()))}
-function saveFamily(id){
-let members=[...document.querySelectorAll(".member")].map(x=>({name:x.querySelector(".mn").value,age:+x.querySelector(".ma").value,edu:x.querySelector(".me").value})).filter(x=>x.name);
-let data={name:document.getElementById("name").value,phone:document.getElementById("phone").value,income:document.getElementById("income").value,housing:document.getElementById("housing").value,need:document.getElementById("need").value,notes:document.getElementById("notes").value,members};
-if(id){Object.assign(families.find(f=>f.id===id),data);viewFamily(id)}else{data.id=Date.now();families.push(data);viewFamily(data.id)}
+
+$('loginBtn').onclick=async()=>{
+  $('loginError').textContent='';
+  try{
+    await auth.signInWithEmailAndPassword(
+      $('email').value.trim(),
+      $('password').value
+    );
+  }catch(e){
+    $('loginError').textContent='تعذر تسجيل الدخول. راجعي البريد وكلمة المرور.';
+  }
+};
+
+$('logoutBtn').onclick=()=>auth.signOut();
+
+function setPermissions(){
+  const admin=userRole==='admin';
+  $('addBtn').classList.toggle('hidden',!admin);
+  $('familyForm').classList.toggle('hidden',!admin);
 }
-function deleteFamily(id){if(confirm("هل تريد حذف الأسرة؟")){families=families.filter(f=>f.id!==id);renderFamilies()}}
-renderLogin();
-</script></body></html>
+
+function listenFamilies(){
+  db.collection('families').orderBy('familyName').onSnapshot(async s=>{
+    try{
+      const rows=await Promise.all(s.docs.map(async d=>{
+        const data=d.data();
+        const ms=await d.ref.collection('members').get();
+        return {
+          id:d.id,
+          ...data,
+          members:ms.docs.map(m=>({
+            id:m.id,
+            ...m.data(),
+            education:m.data().education||m.data().educatin||''
+          }))
+        };
+      }));
+      families=rows;
+      render();
+    }catch(e){
+      $('familyList').textContent='تعذر تحميل بيانات الأفراد: '+e.message;
+    }
+  },e=>{
+    $('familyList').textContent='تعذر تحميل الأسر: '+e.message;
+  });
+}
+
+function render(){
+  const q=$('search').value.trim().toLowerCase();
+  const filtered=families.filter(f=>
+    (f.familyName||'').toLowerCase().includes(q) ||
+    (f.phone||'').includes(q)
+  );
+
+  let members=0,income=0;
+  const counts=Object.fromEntries(stages.map(s=>[s,0]));
+
+  families.forEach(f=>{
+    income+=Number(f.monthlyIncome||0);
+    (f.members||[]).forEach(m=>{
+      members++;
+      if(counts[m.education]!==undefined) counts[m.education]++;
+    });
+  });
+
+  $('familiesCount').textContent=families.length;
+  $('membersCount').textContent=members;
+  $('bridesCount').textContent=families.reduce((n,f)=>n+Number(f.bridesCount||0),0);
+  $('incomeTotal').textContent=income.toLocaleString('ar-EG');
+
+  $('educationStats').innerHTML=stages.map(s=>
+    `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #e5eaf0;padding:7px 0"><span>${s}</span><b>${counts[s]}</b></div>`
+  ).join('');
+
+  $('familyList').innerHTML=filtered.length ?
+    filtered.map(f=>`
+      <article class="family">
+        <div class="family-head">
+          <div>
+            <h3>${esc(f.familyName||'أسرة بدون اسم')}</h3>
+            <div class="meta">
+              ${esc(f.phone||'لا يوجد هاتف')} ·
+              ${esc(f.housing||'السكن غير محدد')} ·
+              دخل ${Number(f.monthlyIncome||0).toLocaleString('ar-EG')}
+            </div>
+          </div>
+          <span class="pill">${(f.members||[]).length} أفراد</span>
+        </div>
+
+        <div class="members">
+          ${(f.members||[]).map(m=>`
+            <div class="member">
+              ${esc(m.name)} — ${esc(String(m.age||''))} سنة — ${esc(m.education||'غير محدد')}
+            </div>
+          `).join('') || '<div class="meta">لا يوجد أفراد مسجلون</div>'}
+        </div>
+
+        ${f.needs?`<div class="note"><b>الاحتياجات:</b> ${esc(f.needs)}</div>`:''}
+        ${f.notes?`<div class="meta">ملاحظات: ${esc(f.notes)}</div>`:''}
+
+        ${userRole==='admin'?`
+          <div class="actions">
+            <button class="btn light" onclick="editFamily('${f.id}')">تعديل</button>
+            <button class="btn danger" onclick="deleteFamily('${f.id}')">حذف</button>
+          </div>
+        `:''}
+      </article>
+    `).join('') :
+    '<div class="empty">لا توجد أسر مطابقة للبحث.</div>';
+}
+
+function esc(v){
+  return String(v??'').replace(/[&<>"']/g,c=>({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[c]));
+}
+
+function addMemberRow(m={}){
+  const div=document.createElement('div');
+  div.className='row member-row';
+  div.style.marginBottom='8px';
+
+  div.innerHTML=`
+    <div>
+      <label>اسم الفرد</label>
+      <input class="m-name" value="${esc(m.name||'')}" required>
+    </div>
+    <div>
+      <label>السن والمرحلة</label>
+      <div style="display:flex;gap:5px">
+        <input class="m-age" type="number" min="0" placeholder="السن"
+          value="${esc(m.age||'')}" style="width:75px">
+        <select class="m-edu">
+          ${stages.map(s=>`<option ${m.education===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+        <button type="button" class="btn danger remove-member">×</button>
+      </div>
+    </div>
+  `;
+
+  div.querySelector('.remove-member').onclick=()=>div.remove();
+  $('memberInputs').append(div);
+}
+
+$('addMember').onclick=()=>addMemberRow();
+
+function resetForm(){
+  $('familyForm').reset();
+  $('familyId').value='';
+  $('memberInputs').innerHTML='';
+  $('formTitle').textContent='بيانات الأسرة';
+  $('formError').textContent='';
+  addMemberRow();
+}
+
+$('addBtn').onclick=()=>{
+  resetForm();
+  $('familyName').focus();
+};
+$('cancelBtn').onclick=resetForm;
+$('search').oninput=render;
+
+window.editFamily=id=>{
+  const f=families.find(x=>x.id===id);
+  if(!f)return;
+
+  resetForm();
+  $('familyId').value=id;
+  $('familyName').value=f.familyName||'';
+  $('phone').value=f.phone||'';
+  $('income').value=f.monthlyIncome||'';
+  $('housing').value=f.housing||'';
+  $('needs').value=f.needs||'';
+  $('notes').value=f.notes||'';
+  $('memberInputs').innerHTML='';
+
+  (f.members||[]).forEach(addMemberRow);
+  $('formTitle').textContent='تعديل بيانات الأسرة';
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+
+window.deleteFamily=async id=>{
+  if(!confirm('هل أنتِ متأكدة من حذف الأسرة؟'))return;
+
+  try{
+    const ref=db.collection('families').doc(id);
+    const ms=await ref.collection('members').get();
+    const batch=db.batch();
+
+    ms.docs.forEach(d=>batch.delete(d.ref));
+    batch.delete(ref);
+    await batch.commit();
+
+  }catch(e){
+    alert('تعذر الحذف: '+e.message);
+  }
+};
+
+$('familyForm').onsubmit=async e=>{
+  e.preventDefault();
+  if(userRole!=='admin')return;
+
+  const members=[...document.querySelectorAll('.member-row')]
+    .map(r=>({
+      name:r.querySelector('.m-name').value.trim(),
+      age:Number(r.querySelector('.m-age').value||0),
+      education:r.querySelector('.m-edu').value
+    }))
+    .filter(m=>m.name);
+
+  const data={
+    familyName:$('familyName').value.trim(),
+    phone:$('phone').value.trim(),
+    monthlyIncome:Number($('income').value||0),
+    housing:$('housing').value,
+    needs:$('needs').value.trim(),
+    notes:$('notes').value.trim(),
+    updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  if(!data.familyName){
+    $('formError').textContent='اكتبي اسم الأسرة.';
+    return;
+  }
+
+  try{
+    const id=$('familyId').value;
+    let ref;
+
+    if(id){
+      ref=db.collection('families').doc(id);
+      await ref.update(data);
+    }else{
+      data.createdAt=firebase.firestore.FieldValue.serverTimestamp();
+      data.bridesCount=0;
+      ref=await db.collection('families').add(data);
+    }
+
+    const old=await ref.collection('members').get();
+    const batch=db.batch();
+
+    old.docs.forEach(d=>batch.delete(d.ref));
+    members.forEach(m=>batch.set(ref.collection('members').doc(),m));
+
+    await batch.commit();
+    resetForm();
+    $('formError').textContent='تم الحفظ بنجاح.';
+
+  }catch(err){
+    $('formError').textContent='تعذر الحفظ: '+err.message;
+  }
+};
+
+init();
+resetForm();
+</script>
+</body>
+  </html>
