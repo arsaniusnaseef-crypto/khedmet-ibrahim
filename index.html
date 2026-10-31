@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>خدمة إبراهيم الجوهري</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body{font-family:Tahoma,Arial,sans-serif;background:#f5f7fb}
+.card{background:#fff;border-radius:22px;box-shadow:0 8px 28px rgba(0,0,0,.07)}
+.hidden{display:none!important}
+input,select,textarea{outline:none}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// لا توجد كلمات مرور ثابتة أو بيانات أسر تجريبية في هذه النسخة.
+// سيتم تفعيل المصادقة والصلاحيات بعد ربط Firebase Authentication وFirestore.
+let families=[];
+let role=null, editing=null;
+
+function renderLogin(){
+app.innerHTML=`<div class="min-h-screen flex items-center justify-center p-5">
+<div class="card w-full max-w-md p-8">
+<div class="text-center mb-8"><div class="text-5xl mb-3">🤝</div>
+<h1 class="text-3xl font-bold text-slate-800">خدمة إبراهيم الجوهري</h1><p class="text-slate-500 mt-2">نظام إدارة ومتابعة الأسر</p></div>
+<label class="block mb-2 font-semibold">اسم المستخدم</label>
+<input id="u" type="text" autocomplete="username" class="w-full border rounded-xl p-3 mb-4" placeholder="اكتبي اسم المستخدم">
+<label class="block mb-2 font-semibold">كلمة المرور</label>
+<input id="p" type="password" class="w-full border rounded-xl p-3 mb-5" placeholder="كلمة المرور">
+<button onclick="login()" class="w-full bg-slate-800 text-white p-3 rounded-xl font-bold">تسجيل الدخول</button>
+<p id="err" class="text-red-600 text-center mt-4"></p>
+</div></div>`;
+}
+function login(){
+  const u=uEl().value.trim(), p=document.getElementById("p").value;
+  if(!u || !p){document.getElementById("err").textContent="من فضلك اكتبي اسم المستخدم وكلمة المرور";return;}
+  document.getElementById("err").textContent="تسجيل الدخول غير مفعّل بعد. يجب ربط Firebase Authentication وإنشاء الحسابات والصلاحيات قبل الاستخدام.";
+}
+function uEl(){return document.getElementById("u")}
+function counts(){
+let c={حضانة:0,ابتدائي:0,إعدادي:0,ثانوي:0,جامعة:0};families.forEach(f=>f.members.forEach(m=>c[m.edu]=(c[m.edu]||0)+1));return c
+}
+function renderDash(username){
+let c=counts(), total=families.reduce((a,f)=>a+f.members.length,0);
+app.innerHTML=`<div class="min-h-screen"><header class="bg-slate-800 text-white p-5"><div class="max-w-6xl mx-auto flex justify-between items-center">
+<div><h1 class="text-2xl font-bold">خدمة إبراهيم الجوهري</h1><p class="text-slate-300">${role.greet}</p></div>
+<button onclick="renderLogin()" class="bg-white/10 px-4 py-2 rounded-xl">خروج</button></div></header>
+<main class="max-w-6xl mx-auto p-5">
+<div class="flex flex-wrap gap-3 mb-6"><button onclick="renderDash('${username}')" class="bg-slate-800 text-white px-5 py-3 rounded-xl">الرئيسية</button>
+<button onclick="renderFamilies()" class="bg-white px-5 py-3 rounded-xl shadow">الأسر</button>
+${role.role==="admin"?`<button onclick="newFamily()" class="bg-white px-5 py-3 rounded-xl shadow">+ إضافة أسرة</button>`:""}
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-7">
+${stat("عدد الأسر",families.length,"🏠")}${stat("إجمالي الأفراد",total,"👨‍👩‍👧‍👦")}
+${stat("عدد العرائس",0,"👰")}${stat("دخل الأسر المسجلة",families.reduce((a,f)=>a+(+f.income||0),0)+" ج","💰")}</div>
+<div class="card p-6"><h2 class="text-xl font-bold mb-5">توزيع أفراد الأسر حسب المرحلة التعليمية</h2>
+<div class="grid grid-cols-2 md:grid-cols-5 gap-4">${Object.entries(c).map(([k,v])=>`<div class="bg-slate-50 rounded-2xl p-5 text-center"><div class="text-slate-500">${k}</div><div class="text-3xl font-bold mt-2">${v}</div></div>`).join("")}</div></div>
+<div class="card p-6 mt-6"><h2 class="text-xl font-bold mb-4">آخر الأسر</h2>${families.slice(-5).reverse().map(f=>familyRow(f)).join("")}</div>
+</main></div>`;
+}
+function stat(a,b,i){return `<div class="card p-5"><div class="text-2xl">${i}</div><div class="text-slate-500 mt-2">${a}</div><div class="text-2xl font-bold mt-1">${b}</div></div>`}
+function familyRow(f){return `<div class="border-b last:border-0 py-4 flex justify-between items-center"><div><b>${f.name}</b><div class="text-sm text-slate-500">${f.phone} • ${f.members.length} أفراد</div></div><button onclick="viewFamily(${f.id})" class="px-4 py-2 rounded-xl bg-slate-100">عرض</button></div>`}
+function renderFamilies(){
+app.innerHTML=`<div class="min-h-screen"><header class="bg-slate-800 text-white p-5"><div class="max-w-6xl mx-auto flex justify-between"><div><h1 class="text-2xl font-bold">الأسر</h1><p class="text-slate-300">${role.greet}</p></div><button onclick="renderLogin()" class="bg-white/10 px-4 py-2 rounded-xl">خروج</button></div></header>
+<main class="max-w-6xl mx-auto p-5"><div class="flex gap-3 mb-5"><button onclick="renderFamilies()" class="bg-slate-800 text-white px-5 py-3 rounded-xl">الأسر</button><button onclick="renderDash()" class="bg-white px-5 py-3 rounded-xl shadow">الرئيسية</button>${role.role==="admin"?`<button onclick="newFamily()" class="bg-white px-5 py-3 rounded-xl shadow">+ إضافة أسرة</button>`:""}</div>
+<input id="search" oninput="filterFamilies()" class="w-full border rounded-2xl p-4 mb-5" placeholder="ابحث باسم الأسرة أو رقم الهاتف...">
+<div id="flist" class="card p-5">${families.map(f=>familyRow(f)).join("")}</div></main></div>`;
+}
+function filterFamilies(){let q=document.getElementById("search").value.toLowerCase();document.getElementById("flist").innerHTML=families.filter(f=>(f.name+f.phone).toLowerCase().includes(q)).map(f=>familyRow(f)).join("")||"<p class='text-center text-slate-500 p-8'>لا توجد نتائج</p>"}
+function viewFamily(id){
+let f=families.find(x=>x.id===id);
+app.innerHTML=`<main class="max-w-4xl mx-auto p-5"><button onclick="renderFamilies()" class="mb-5">← رجوع</button>
+<div class="card p-7"><div class="flex justify-between gap-3 flex-wrap"><div><h1 class="text-3xl font-bold">${f.name}</h1><p class="text-slate-500 mt-2">${f.phone}</p></div>${role.role==="admin"?`<div class="flex gap-2"><button onclick="editFamily(${f.id})" class="bg-slate-800 text-white px-4 py-2 rounded-xl">تعديل</button><button onclick="deleteFamily(${f.id})" class="bg-red-50 text-red-700 px-4 py-2 rounded-xl">حذف</button></div>`:""}</div>
+<div class="grid md:grid-cols-3 gap-4 my-6"><div class="bg-slate-50 p-4 rounded-xl"><b>الدخل الشهري</b><br>${f.income||"-"} جنيه</div><div class="bg-slate-50 p-4 rounded-xl"><b>السكن</b><br>${f.housing||"-"}</div><div class="bg-slate-50 p-4 rounded-xl"><b>الاحتياج</b><br>${f.need||"-"}</div></div>
+<h2 class="text-xl font-bold mb-3">أفراد الأسرة</h2><div class="overflow-x-auto"><table class="w-full text-right"><thead><tr class="border-b"><th class="p-3">الاسم</th><th class="p-3">السن</th><th class="p-3">المرحلة/المؤهل</th></tr></thead><tbody>${f.members.map(m=>`<tr class="border-b"><td class="p-3">${m.name}</td><td class="p-3">${m.age}</td><td class="p-3">${m.edu}</td></tr>`).join("")}</tbody></table></div>
+<div class="mt-6 bg-slate-50 rounded-xl p-4"><b>ملاحظات</b><p class="mt-2">${f.notes||"لا توجد ملاحظات"}</p></div></div></main>`;
+}
+function newFamily(){editFamily(null)}
+function editFamily(id){
+let f=id?families.find(x=>x.id===id):{name:"",phone:"",income:"",housing:"",need:"",notes:"",members:[]};
+editing=id;
+app.innerHTML=`<main class="max-w-4xl mx-auto p-5"><button onclick="${id?"viewFamily("+id+")":"renderFamilies()"}" class="mb-5">← رجوع</button>
+<div class="card p-7"><h1 class="text-2xl font-bold mb-6">${id?"تعديل الأسرة":"إضافة أسرة جديدة"}</h1>
+<div class="grid md:grid-cols-2 gap-4"><input id="name" value="${f.name}" class="border rounded-xl p-3" placeholder="اسم الأسرة"><input id="phone" value="${f.phone}" class="border rounded-xl p-3" placeholder="رقم الهاتف"><input id="income" value="${f.income}" class="border rounded-xl p-3" placeholder="الدخل الشهري"><input id="housing" value="${f.housing}" class="border rounded-xl p-3" placeholder="السكن"><input id="need" value="${f.need}" class="border rounded-xl p-3 md:col-span-2" placeholder="الاحتياج"><textarea id="notes" class="border rounded-xl p-3 md:col-span-2" placeholder="ملاحظات">${f.notes}</textarea></div>
+<h2 class="text-xl font-bold mt-7 mb-3">أفراد الأسرة</h2><div id="members">${f.members.map((m,i)=>memberInput(m,i)).join("")}</div>
+<button onclick="addMember()" class="mt-3 bg-slate-100 px-4 py-2 rounded-xl">+ إضافة فرد</button>
+<button onclick="saveFamily(${id||0})" class="block w-full mt-6 bg-slate-800 text-white p-3 rounded-xl font-bold">حفظ البيانات</button></div></main>`;
+}
+function memberInput(m={},i){return `<div class="grid md:grid-cols-4 gap-2 mb-3 member"><input class="border rounded-xl p-3 mn" value="${m.name||""}" placeholder="اسم الفرد"><input class="border rounded-xl p-3 ma" type="number" value="${m.age||""}" placeholder="السن"><select class="border rounded-xl p-3 me"><option ${m.edu==="حضانة"?"selected":""}>حضانة</option><option ${m.edu==="ابتدائي"?"selected":""}>ابتدائي</option><option ${m.edu==="إعدادي"?"selected":""}>إعدادي</option><option ${m.edu==="ثانوي"?"selected":""}>ثانوي</option><option ${m.edu==="جامعة"?"selected":""}>جامعة</option></select><button onclick="this.parentElement.remove()" class="bg-red-50 text-red-700 rounded-xl">حذف</button></div>`}
+function addMember(){document.getElementById("members").insertAdjacentHTML("beforeend",memberInput({},Date.now()))}
+function saveFamily(id){
+let members=[...document.querySelectorAll(".member")].map(x=>({name:x.querySelector(".mn").value,age:+x.querySelector(".ma").value,edu:x.querySelector(".me").value})).filter(x=>x.name);
+let data={name:document.getElementById("name").value,phone:document.getElementById("phone").value,income:document.getElementById("income").value,housing:document.getElementById("housing").value,need:document.getElementById("need").value,notes:document.getElementById("notes").value,members};
+if(id){Object.assign(families.find(f=>f.id===id),data);viewFamily(id)}else{data.id=Date.now();families.push(data);viewFamily(data.id)}
+}
+function deleteFamily(id){if(confirm("هل تريد حذف الأسرة؟")){families=families.filter(f=>f.id!==id);renderFamilies()}}
+renderLogin();
+</script></body></html>
