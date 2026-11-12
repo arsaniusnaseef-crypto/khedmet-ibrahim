@@ -53,6 +53,9 @@ textarea{min-height:80px;resize:vertical}
 .status{font-size:13px;color:#d4deeb}
 .actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 .foot{text-align:center;color:var(--muted);font-size:12px;padding:15px}
+.branch-item{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--line);border-radius:11px;padding:9px 12px;margin:7px 0}
+.branch-tools{display:flex;gap:7px;align-items:center}
+.filterbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 @media(max-width:800px){
 .stats{grid-template-columns:repeat(2,1fr)}
 .layout{grid-template-columns:1fr}
@@ -61,7 +64,7 @@ textarea{min-height:80px;resize:vertical}
 .brand{font-size:18px}
 }
 @media(max-width:420px){
-.row{grid-template-columns:1fr}
+.row,.filterbar{grid-template-columns:1fr}
 .family-head{align-items:flex-start;flex-direction:column}
 }
 </style>
@@ -95,12 +98,36 @@ textarea{min-height:80px;resize:vertical}
     </div>
   </header>
 
+  <div class="panel" style="margin-top:16px">
+    <div class="filterbar">
+      <div>
+        <label for="branchFilter">عرض بيانات الفرع</label>
+        <select id="branchFilter"><option value="all">كل الفروع</option></select>
+      </div>
+      <div>
+        <label>ملخص العرض</label>
+        <div id="branchSummary" class="notice" style="margin:0">كل الفروع</div>
+      </div>
+    </div>
+  </div>
+
   <div class="stats">
     <div class="stat"><small>إجمالي الأسر</small><strong id="familiesCount">0</strong></div>
     <div class="stat"><small>إجمالي الأفراد</small><strong id="membersCount">0</strong></div>
     <div class="stat"><small>العرائس</small><strong id="bridesCount">0</strong></div>
     <div class="stat"><small>إجمالي الدخل الشهري</small><strong id="incomeTotal">0</strong></div>
   </div>
+
+  <section id="branchAdminPanel" class="panel hidden">
+    <h2>إدارة الفروع</h2>
+    <div class="notice">أضيفي أسماء الفروع هنا. تعديل اسم الفرع يحدّث الاسم الظاهر للأسر المرتبطة به. لا تحذفي أي فرع مستخدم؛ يمكن تركه موجودًا إذا توقف العمل به.</div>
+    <div class="toolbar">
+      <input id="newBranchName" placeholder="اكتبي اسم الفرع الجديد">
+      <button class="btn" id="addBranchBtn" type="button">+ إضافة فرع</button>
+    </div>
+    <div id="branchList"><div class="empty">جارٍ تحميل الفروع...</div></div>
+    <div id="branchError" style="color:#b42318;margin-top:8px"></div>
+  </section>
 
   <div class="layout">
     <section class="panel">
@@ -119,6 +146,11 @@ textarea{min-height:80px;resize:vertical}
           <input type="hidden" id="familyId">
           <label>اسم الأسرة</label>
           <input id="familyName" required>
+
+          <label>اسم الفرع</label>
+          <select id="familyBranch">
+            <option value="">اختاري الفرع</option>
+          </select>
 
           <div class="row">
             <div>
@@ -185,7 +217,8 @@ window.FIREBASE_CONFIG = {
 
 <script>
 const $ = id => document.getElementById(id);
-let auth = null, db = null, currentUser = null, userRole = null, families = [];
+let auth = null, db = null, currentUser = null, userRole = null;let families = [], branches = [], selectedBranch = 'all';
+let unsubscribeFamilies = null, unsubscribeBranches = null;
 const stages = ['حضانة','ابتدائي','إعدادي','ثانوي','جامعة','دراسات عليا'];
 
 function showLogin(){
@@ -197,8 +230,7 @@ function showApp(){
   $('appView').classList.remove('hidden');
 }
 function configReady(){
-  return window.FIREBASE_CONFIG &&
-    window.FIREBASE_CONFIG.apiKey &&
+  return window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey &&
     window.FIREBASE_CONFIG.apiKey !== 'PASTE_API_KEY';
 }
 
@@ -208,7 +240,6 @@ function init(){
     $('loginBtn').disabled=true;
     return;
   }
-
   try{
     firebase.initializeApp(window.FIREBASE_CONFIG);
     auth=firebase.auth();
@@ -217,34 +248,31 @@ function init(){
     auth.onAuthStateChanged(async user=>{
       if(!user){
         currentUser=null;
+        if(unsubscribeFamilies) unsubscribeFamilies();
+        if(unsubscribeBranches) unsubscribeBranches();
         showLogin();
         return;
       }
-
       try{
         const doc=await db.collection('users').doc(user.uid).get();
-
         if(!doc.exists || !['admin','viewer'].includes(doc.data().role)){
           await auth.signOut();
           $('loginError').textContent='هذا الحساب غير مضاف إلى مستخدمي الخدمة.';
           return;
         }
-
         currentUser=user;
         userRole=doc.data().role;
         $('who').textContent=(doc.data().displayName||user.email)+' — '+
           (userRole==='admin'?'مدير النظام':'مشاهدة فقط');
-
         showApp();
         setPermissions();
+        listenBranches();
         listenFamilies();
-
       }catch(e){
         $('loginError').textContent='تعذر التحقق من الصلاحيات: '+e.message;
         await auth.signOut();
       }
     });
-
   }catch(e){
     $('loginError').textContent='خطأ في إعداد Firebase: '+e.message;
   }
@@ -253,25 +281,35 @@ function init(){
 $('loginBtn').onclick=async()=>{
   $('loginError').textContent='';
   try{
-    await auth.signInWithEmailAndPassword(
-      $('email').value.trim(),
-      $('password').value
-    );
+    await auth.signInWithEmailAndPassword($('email').value.trim(),$('password').value);
   }catch(e){
     $('loginError').textContent='تعذر تسجيل الدخول. راجعي البريد وكلمة المرور.';
   }
 };
-
 $('logoutBtn').onclick=()=>auth.signOut();
 
 function setPermissions(){
   const admin=userRole==='admin';
   $('addBtn').classList.toggle('hidden',!admin);
   $('familyForm').classList.toggle('hidden',!admin);
+  $('branchAdminPanel').classList.toggle('hidden',!admin);
+}
+
+function listenBranches(){
+  if(unsubscribeBranches) unsubscribeBranches();
+  unsubscribeBranches=db.collection('branches').orderBy('name').onSnapshot(s=>{
+    branches=s.docs.map(d=>({id:d.id,...d.data()}));
+    renderBranchOptions();
+    renderBranchAdmin();
+    render();
+  },e=>{
+    $('branchError').textContent='تعذر تحميل الفروع: '+e.message;
+  });
 }
 
 function listenFamilies(){
-  db.collection('families').orderBy('familyName').onSnapshot(async s=>{
+  if(unsubscribeFamilies) unsubscribeFamilies();
+  unsubscribeFamilies=db.collection('families').orderBy('familyName').onSnapshot(async s=>{
     try{
       const rows=await Promise.all(s.docs.map(async d=>{
         const data=d.data();
@@ -279,6 +317,8 @@ function listenFamilies(){
         return {
           id:d.id,
           ...data,
+          branchId:data.branchId||'',
+          branchName:data.branchName||'',
           members:ms.docs.map(m=>({
             id:m.id,
             ...m.data(),
@@ -296,17 +336,104 @@ function listenFamilies(){
   });
 }
 
+function renderBranchOptions(){
+  const filter=$('branchFilter');
+  const familySelect=$('familyBranch');
+  const oldFilter=filter.value||selectedBranch;
+  const oldFamily=familySelect.value;
+  filter.innerHTML='<option value="all">كل الفروع</option>'+
+    branches.map(b=>`<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('')+
+    '<option value="__none">أسر بدون فرع (قديمة)</option>';
+  filter.value=(oldFilter==='all'||oldFilter==='__none'||branches.some(b=>b.id===oldFilter))?oldFilter:'all';
+  selectedBranch=filter.value;
+
+  familySelect.innerHTML='<option value="">اختاري الفرع</option>'+
+    branches.map(b=>`<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('');
+  if(oldFamily && branches.some(b=>b.id===oldFamily)) familySelect.value=oldFamily;
+}
+
+function renderBranchAdmin(){
+  if(userRole!=='admin') return;
+  $('branchList').innerHTML=branches.length?branches.map(b=>`
+    <div class="branch-item">
+      <strong>${esc(b.name)}</strong>
+      <div class="branch-tools">
+        <button type="button" class="btn light" onclick="renameBranch('${b.id}')">تعديل الاسم</button>
+      </div>
+    </div>
+  `).join(''):'<div class="empty">لم تتم إضافة فروع بعد.</div>';
+}
+
+$('addBranchBtn').onclick=async()=>{
+  if(userRole!=='admin') return;
+  const name=$('newBranchName').value.trim();
+  $('branchError').textContent='';
+  if(!name){$('branchError').textContent='اكتبي اسم الفرع أولًا.';return;}
+  if(branches.some(b=>b.name.trim().toLowerCase()===name.toLowerCase())){
+    $('branchError').textContent='اسم الفرع موجود بالفعل.';return;
+  }
+  try{
+    await db.collection('branches').add({
+      name,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy:currentUser.uid
+    });
+    $('newBranchName').value='';
+    $('branchError').style.color='#167647';
+    $('branchError').textContent='تمت إضافة الفرع بنجاح.';
+  }catch(e){
+    $('branchError').style.color='#b42318';
+    $('branchError').textContent='تعذرت إضافة الفرع: '+e.message;
+  }
+};
+
+window.renameBranch=async id=>{
+  if(userRole!=='admin') return;
+  const branch=branches.find(b=>b.id===id);
+  if(!branch) return;
+  const name=prompt('اكتبي الاسم الجديد للفرع:',branch.name);
+  if(name===null) return;
+  const clean=name.trim();
+  if(!clean){alert('اسم الفرع لا يمكن أن يكون فارغًا.');return;}
+  if(branches.some(b=>b.id!==id && b.name.trim().toLowerCase()===clean.toLowerCase())){
+    alert('اسم الفرع موجود بالفعل.');return;
+  }
+  try{
+    await db.collection('branches').doc(id).update({
+      name:clean,
+      updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    const batch=db.batch();
+    families.filter(f=>f.branchId===id).forEach(f=>{
+      batch.update(db.collection('families').doc(f.id),{branchName:clean});
+    });
+    if(families.some(f=>f.branchId===id)) await batch.commit();
+  }catch(e){
+    alert('تعذر تعديل اسم الفرع: '+e.message);
+  }
+};
+
+$('branchFilter').onchange=()=>{
+  selectedBranch=$('branchFilter').value;
+  render();
+};
+
+function getVisibleFamilies(){
+  if(selectedBranch==='all') return families;
+  if(selectedBranch==='__none') return families.filter(f=>!f.branchId);
+  return families.filter(f=>f.branchId===selectedBranch);
+}
+
 function render(){
   const q=$('search').value.trim().toLowerCase();
-  const filtered=families.filter(f=>
-    (f.familyName||'').toLowerCase().includes(q) ||
-    (f.phone||'').includes(q)
+  const visible=getVisibleFamilies();
+  const filtered=visible.filter(f=>
+    (f.familyName||'').toLowerCase().includes(q) || (f.phone||'').includes(q)
   );
 
   let members=0,income=0;
   const counts=Object.fromEntries(stages.map(s=>[s,0]));
-
-  families.forEach(f=>{
+  visible.forEach(f=>{
     income+=Number(f.monthlyIncome||0);
     (f.members||[]).forEach(m=>{
       members++;
@@ -314,22 +441,29 @@ function render(){
     });
   });
 
-  $('familiesCount').textContent=families.length;
+  $('familiesCount').textContent=visible.length;
   $('membersCount').textContent=members;
-  $('bridesCount').textContent=families.reduce((n,f)=>n+Number(f.bridesCount||0),0);
+  $('bridesCount').textContent=visible.reduce((n,f)=>n+Number(f.bridesCount||0),0);
   $('incomeTotal').textContent=income.toLocaleString('ar-EG');
+  const branchLabel=selectedBranch==='all'?'كل الفروع':
+    selectedBranch==='__none'?'أسر بدون فرع':
+    (branches.find(b=>b.id===selectedBranch)?.name||'فرع');
+  $('branchSummary').textContent='الإحصائيات المعروضة: '+branchLabel;
 
   $('educationStats').innerHTML=stages.map(s=>
     `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #e5eaf0;padding:7px 0"><span>${s}</span><b>${counts[s]}</b></div>`
   ).join('');
 
-  $('familyList').innerHTML=filtered.length ?
-    filtered.map(f=>`
+  $('familyList').innerHTML=filtered.length?filtered.map(f=>{
+    const branch=branches.find(b=>b.id===f.branchId);
+    const branchLabel=branch?.name||f.branchName||'غير محدد';
+    return `
       <article class="family">
         <div class="family-head">
           <div>
             <h3>${esc(f.familyName||'أسرة بدون اسم')}</h3>
             <div class="meta">
+              الفرع: <b>${esc(branchLabel)}</b> ·
               ${esc(f.phone||'لا يوجد هاتف')} ·
               ${esc(f.housing||'السكن غير محدد')} ·
               دخل ${Number(f.monthlyIncome||0).toLocaleString('ar-EG')}
@@ -337,36 +471,25 @@ function render(){
           </div>
           <span class="pill">${(f.members||[]).length} أفراد</span>
         </div>
-
         <div class="members">
           ${(f.members||[]).map(m=>`
             <div class="member">
               ${esc(m.name)} — ${esc(String(m.age||''))} سنة — ${esc(m.education||'غير محدد')}
             </div>
-          `).join('') || '<div class="meta">لا يوجد أفراد مسجلون</div>'}
+          `).join('')||'<div class="meta">لا يوجد أفراد مسجلون</div>'}
         </div>
-
         ${f.needs?`<div class="note"><b>الاحتياجات:</b> ${esc(f.needs)}</div>`:''}
         ${f.notes?`<div class="meta">ملاحظات: ${esc(f.notes)}</div>`:''}
-
         ${userRole==='admin'?`
           <div class="actions">
             <button class="btn light" onclick="editFamily('${f.id}')">تعديل</button>
             <button class="btn danger" onclick="deleteFamily('${f.id}')">حذف</button>
-          </div>
-        `:''}
-      </article>
-    `).join('') :
-    '<div class="empty">لا توجد أسر مطابقة للبحث.</div>';
-}
-
-function esc(v){
+          </div>`:''}
+      </article>`;
+  }).join(''):'<div class="empty">لا توجد أسر مطابقة للبحث.</div>';
+      }function esc(v){
   return String(v??'').replace(/[&<>"']/g,c=>({
-    '&':'&amp;',
-    '<':'&lt;',
-    '>':'&gt;',
-    '"':'&quot;',
-    "'":'&#39;'
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
   }[c]));
 }
 
@@ -374,7 +497,6 @@ function addMemberRow(m={}){
   const div=document.createElement('div');
   div.className='row member-row';
   div.style.marginBottom='8px';
-
   div.innerHTML=`
     <div>
       <label>اسم الفرد</label>
@@ -383,20 +505,16 @@ function addMemberRow(m={}){
     <div>
       <label>السن والمرحلة</label>
       <div style="display:flex;gap:5px">
-        <input class="m-age" type="number" min="0" placeholder="السن"
-          value="${esc(m.age||'')}" style="width:75px">
+        <input class="m-age" type="number" min="0" placeholder="السن" value="${esc(m.age||'')}" style="width:75px">
         <select class="m-edu">
           ${stages.map(s=>`<option ${m.education===s?'selected':''}>${s}</option>`).join('')}
         </select>
         <button type="button" class="btn danger remove-member">×</button>
       </div>
-    </div>
-  `;
-
+    </div>`;
   div.querySelector('.remove-member').onclick=()=>div.remove();
   $('memberInputs').append(div);
 }
-
 $('addMember').onclick=()=>addMemberRow();
 
 function resetForm(){
@@ -407,28 +525,23 @@ function resetForm(){
   $('formError').textContent='';
   addMemberRow();
 }
-
-$('addBtn').onclick=()=>{
-  resetForm();
-  $('familyName').focus();
-};
+$('addBtn').onclick=()=>{resetForm();$('familyName').focus();};
 $('cancelBtn').onclick=resetForm;
 $('search').oninput=render;
 
 window.editFamily=id=>{
   const f=families.find(x=>x.id===id);
   if(!f)return;
-
   resetForm();
   $('familyId').value=id;
   $('familyName').value=f.familyName||'';
+  $('familyBranch').value=f.branchId||'';
   $('phone').value=f.phone||'';
   $('income').value=f.monthlyIncome||'';
   $('housing').value=f.housing||'';
   $('needs').value=f.needs||'';
   $('notes').value=f.notes||'';
   $('memberInputs').innerHTML='';
-
   (f.members||[]).forEach(addMemberRow);
   $('formTitle').textContent='تعديل بيانات الأسرة';
   window.scrollTo({top:0,behavior:'smooth'});
@@ -436,16 +549,13 @@ window.editFamily=id=>{
 
 window.deleteFamily=async id=>{
   if(!confirm('هل أنتِ متأكدة من حذف الأسرة؟'))return;
-
   try{
     const ref=db.collection('families').doc(id);
     const ms=await ref.collection('members').get();
     const batch=db.batch();
-
     ms.docs.forEach(d=>batch.delete(d.ref));
     batch.delete(ref);
     await batch.commit();
-
   }catch(e){
     alert('تعذر الحذف: '+e.message);
   }
@@ -455,16 +565,19 @@ $('familyForm').onsubmit=async e=>{
   e.preventDefault();
   if(userRole!=='admin')return;
 
-  const members=[...document.querySelectorAll('.member-row')]
-    .map(r=>({
-      name:r.querySelector('.m-name').value.trim(),
-      age:Number(r.querySelector('.m-age').value||0),
-      education:r.querySelector('.m-edu').value
-    }))
-    .filter(m=>m.name);
+  const members=[...document.querySelectorAll('.member-row')].map(r=>({
+    name:r.querySelector('.m-name').value.trim(),
+    age:Number(r.querySelector('.m-age').value||0),
+    education:r.querySelector('.m-edu').value
+  })).filter(m=>m.name);
+
+  const branchId=$('familyBranch').value;
+  const selected=branches.find(b=>b.id===branchId);
 
   const data={
     familyName:$('familyName').value.trim(),
+    branchId:branchId||'',
+    branchName:selected?.name||'',
     phone:$('phone').value.trim(),
     monthlyIncome:Number($('income').value||0),
     housing:$('housing').value,
@@ -499,9 +612,11 @@ $('familyForm').onsubmit=async e=>{
 
     await batch.commit();
     resetForm();
+    $('formError').style.color='#167647';
     $('formError').textContent='تم الحفظ بنجاح.';
 
   }catch(err){
+    $('formError').style.color='#b42318';
     $('formError').textContent='تعذر الحفظ: '+err.message;
   }
 };
@@ -510,4 +625,4 @@ init();
 resetForm();
 </script>
 </body>
-  </html>
+</html>
