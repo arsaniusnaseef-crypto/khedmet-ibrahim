@@ -33,7 +33,7 @@ textarea{min-height:80px;resize:vertical}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}
 .stat{padding:16px}
 .stat small{color:var(--muted)}
-.stat strong{display:block;font-size:26px;color:var(--navy)}
+.stat strong{display:block;font-size:26px;color:var(--navy);direction:ltr;unicode-bidi:isolate;text-align:right}
 .layout{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
 .panel{padding:18px;margin-bottom:16px}
 .panel h2{font-size:18px;color:var(--navy);margin:0 0 14px}
@@ -122,7 +122,7 @@ textarea{min-height:80px;resize:vertical}
     <div class="stat"><small>إجمالي الأسر</small><strong id="familiesCount">0</strong></div>
     <div class="stat"><small>إجمالي الأفراد</small><strong id="membersCount">0</strong></div>
     <div class="stat"><small>العرائس</small><strong id="bridesCount">0</strong></div>
-    <div class="stat"><small>إجمالي الدخل الشهري</small><strong id="incomeTotal">0</strong></div>
+    <div class="stat"><small>إجمالي الدخل الشهري</small><strong id="incomeTotal" dir="ltr">0</strong></div>
     <div class="stat"><small>عدد الفروع</small><strong id="branchesCount">0</strong></div>
     <div class="stat"><small>عدد الخدام</small><strong id="servantsCount">0</strong></div>
   </div>
@@ -275,7 +275,13 @@ function init(){
     auth=firebase.auth();
     db=firebase.firestore();
 
-    auth.onAuthStateChanged(async user=>{        if(unsubscribeFamilies) unsubscribeFamilies();
+    auth.onAuthStateChanged(async user=>{      if(!user){
+        currentUser=null;
+        userRole=null;
+        families=[];
+        branches=[];
+        servants=[];
+        if(unsubscribeFamilies) unsubscribeFamilies();
         if(unsubscribeBranches) unsubscribeBranches();
         if(unsubscribeServants) unsubscribeServants();
         showLogin();
@@ -559,7 +565,7 @@ function render(){
   $('familiesCount').textContent=visible.length;
   $('membersCount').textContent=members;
   $('bridesCount').textContent=visible.reduce((n,f)=>n+Number(f.bridesCount||0),0);
-  $('incomeTotal').textContent=income.toLocaleString('en-US');
+  $('incomeTotal').textContent=toEnglishDigits(String(income));
   $('branchesCount').textContent=branches.length;
   $('servantsCount').textContent=servants.length;
   renderBranchServantStats();
@@ -584,7 +590,7 @@ function render(){
               الفرع: <b>${esc(branchLabel)}</b> ·
               ${esc(f.phone||'لا يوجد هاتف')} ·
               ${esc(f.housing||'السكن غير محدد')} ·
-              دخل ${Number(f.monthlyIncome||0).toLocaleString('en-US')}
+              دخل ${toEnglishDigits(String(Number(f.monthlyIncome||0)))}
             </div>
             <div class="meta">
               <b>العنوان:</b>
@@ -612,6 +618,15 @@ function render(){
           </div>`:''}
       </article>`;
   }).join(''):'<div class="empty">لا توجد أسر مطابقة للبحث.</div>';
+}
+
+function toEnglishDigits(value){
+  return String(value).replace(/[٠-٩۰-۹]/g, digit => {
+    const code=digit.charCodeAt(0);
+    if(code>=0x0660 && code<=0x0669) return String(code-0x0660);
+    if(code>=0x06F0 && code<=0x06F9) return String(code-0x06F0);
+    return digit;
+  });
 }
 
 function esc(v){
