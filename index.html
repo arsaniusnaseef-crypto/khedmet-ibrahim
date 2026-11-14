@@ -24,6 +24,7 @@ button{cursor:pointer}
 label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}
 input,select,textarea{width:100%;border:1px solid #d5dde7;border-radius:11px;padding:11px;background:#fff;color:var(--ink)}
 textarea{min-height:80px;resize:vertical}
+button{cursor:pointer}
 .btn{border:0;border-radius:11px;padding:10px 16px;background:var(--navy);color:white;font-weight:700}
 .btn.light{background:#edf2f7;color:var(--navy)}
 .btn.gold{background:var(--gold);color:#1d2939}
@@ -62,7 +63,7 @@ textarea{min-height:80px;resize:vertical}
 .small-stat{background:#f7f9fc;border:1px solid var(--line);border-radius:10px;padding:10px}
 .small-stat b{display:block;color:var(--navy);font-size:18px}
 .multi-help{font-size:12px;color:var(--muted);margin-top:5px}
-.filterbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.filterbar{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:800px){
 .stats{grid-template-columns:repeat(2,1fr)}
 .layout{grid-template-columns:1fr}
@@ -236,9 +237,7 @@ const $ = id => document.getElementById(id);
 let auth = null, db = null, currentUser = null, userRole = null;
 let families = [], branches = [], servants = [], selectedBranch = 'all';
 let unsubscribeFamilies = null, unsubscribeBranches = null, unsubscribeServants = null;
-const stages = ['حضانة','ابتدائي','إعدادي','ثانوي','جامعة','دراسات عليا'];
-
-function showLogin(){
+const stages = ['حضانة','ابتدائي','إعدادي','ثانوي','جامعة','دراسات عليا'];function showLogin(){
   $('loginView').classList.remove('hidden');
   $('appView').classList.add('hidden');
 }
@@ -250,6 +249,7 @@ function configReady(){
   return window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey &&
     window.FIREBASE_CONFIG.apiKey !== 'PASTE_API_KEY';
 }
+
 function init(){
   if(!configReady()){
     $('loginError').textContent='يلزم إعداد ربط Firebase أولًا قبل تسجيل الدخول.';
@@ -474,9 +474,16 @@ window.addServant=async branchId=>{
     alert('اسم الخادم موجود بالفعل في هذا الفرع.');return;
   }
   try{
-    await db.collection('servants').add({name,branchId,createdAt:firebase.firestore.FieldValue.serverTimestamp(),createdBy:currentUser.uid});
+    await db.collection('servants').add({
+      name,
+      branchId,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy:currentUser.uid
+    });
     input.value='';
-  }catch(e){alert('تعذرت إضافة الخادم: '+e.message);}
+  }catch(e){
+    alert('تعذرت إضافة الخادم: '+e.message);
+  }
 };
 
 window.renameServant=async id=>{
@@ -488,7 +495,10 @@ window.renameServant=async id=>{
   const clean=name.trim();
   if(!clean){alert('اسم الخادم لا يمكن أن يكون فارغًا.');return;}
   try{
-    await db.collection('servants').doc(id).update({name:clean,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await db.collection('servants').doc(id).update({
+      name:clean,
+      updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
     const batch=db.batch();
     families.filter(f=>(f.servantIds||[]).includes(id)).forEach(f=>{
       const ids=f.servantIds||[];
@@ -496,7 +506,9 @@ window.renameServant=async id=>{
       batch.update(db.collection('families').doc(f.id),{servantNames:names});
     });
     if(families.some(f=>(f.servantIds||[]).includes(id))) await batch.commit();
-  }catch(e){alert('تعذر تعديل اسم الخادم: '+e.message);}
+  }catch(e){
+    alert('تعذر تعديل اسم الخادم: '+e.message);
+  }
 };
 
 function renderBranchServantStats(){
@@ -517,8 +529,7 @@ function renderBranchServantStats(){
       }).join('')}
     </div>`;
   }).join(''):'<div class="empty">أضيفي الفروع لعرض الإحصائيات.</div>';
-}
-$('branchFilter').onchange=()=>{
+                }$('branchFilter').onchange=()=>{
   selectedBranch=$('branchFilter').value;
   render();
 };
@@ -601,7 +612,11 @@ function render(){
 
 function esc(v){
   return String(v??'').replace(/[&<>"']/g,c=>({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
   }[c]));
 }
 
@@ -609,24 +624,28 @@ function addMemberRow(m={}){
   const div=document.createElement('div');
   div.className='row member-row';
   div.style.marginBottom='8px';
+
   div.innerHTML=`
     <div>
       <label>اسم الفرد</label>
-      <input class="m-name" value="${esc(m.name||'')}" required>
+      <input class="m-name" value="${esc(m.name||'')}" placeholder="اسم الفرد (اختياري)">
     </div>
     <div>
       <label>السن والمرحلة</label>
       <div style="display:flex;gap:5px">
         <input class="m-age" type="number" min="0" placeholder="السن" value="${esc(m.age||'')}" style="width:75px">
         <select class="m-edu">
-          ${stages.map(s=>`<option ${m.education===s?'selected':''}>${s}</option>`).join('')}
+          <option value="">المرحلة التعليمية (اختياري)</option>
+          ${stages.map(s=>`<option value="${s}" ${m.education===s?'selected':''}>${s}</option>`).join('')}
         </select>
         <button type="button" class="btn danger remove-member">×</button>
       </div>
     </div>`;
+
   div.querySelector('.remove-member').onclick=()=>div.remove();
   $('memberInputs').append(div);
 }
+
 $('addMember').onclick=()=>addMemberRow();
 
 function resetForm(){
@@ -636,15 +655,20 @@ function resetForm(){
   $('familyServants').innerHTML='';
   $('formTitle').textContent='بيانات الأسرة';
   $('formError').textContent='';
-  addMemberRow();
 }
-$('addBtn').onclick=()=>{resetForm();$('familyName').focus();};
+
+$('addBtn').onclick=()=>{
+  resetForm();
+  $('familyName').focus();
+};
+
 $('cancelBtn').onclick=resetForm;
 $('search').oninput=render;
 
 window.editFamily=id=>{
   const f=families.find(x=>x.id===id);
   if(!f)return;
+
   resetForm();
   $('familyId').value=id;
   $('familyName').value=f.familyName||'';
@@ -656,19 +680,24 @@ window.editFamily=id=>{
   $('needs').value=f.needs||'';
   $('notes').value=f.notes||'';
   $('memberInputs').innerHTML='';
+
   (f.members||[]).forEach(addMemberRow);
+
   $('formTitle').textContent='تعديل بيانات الأسرة';
   window.scrollTo({top:0,behavior:'smooth'});
 };
 
 window.deleteFamily=async id=>{
   if(!confirm('هل أنتِ متأكدة من حذف الأسرة؟'))return;
+
   try{
     const ref=db.collection('families').doc(id);
     const ms=await ref.collection('members').get();
     const batch=db.batch();
+
     ms.docs.forEach(d=>batch.delete(d.ref));
     batch.delete(ref);
+
     await batch.commit();
   }catch(e){
     alert('تعذر الحذف: '+e.message);
@@ -677,17 +706,25 @@ window.deleteFamily=async id=>{
 
 $('familyForm').onsubmit=async e=>{
   e.preventDefault();
+
   if(userRole!=='admin')return;
+
+  // اسم الفرد اختياري، والسن والمرحلة اختياريان.
+  // أي صف فارغ بالكامل لن يتم حفظه كفرد.
   const members=[...document.querySelectorAll('.member-row')].map(r=>({
     name:r.querySelector('.m-name').value.trim(),
     age:Number(r.querySelector('.m-age').value||0),
     education:r.querySelector('.m-edu').value
-  })).filter(m=>m.name);
+  })).filter(m=>m.name || m.age || m.education);
 
   const branchId=$('familyBranch').value;
   const selected=branches.find(b=>b.id===branchId);
-  const servantIds=[...$('familyServants').selectedOptions].map(o=>o.value).filter(Boolean);
-  const servantNames=servantIds.map(id=>servants.find(x=>x.id===id)?.name).filter(Boolean);
+
+  const servantIds=[...$('familyServants').selectedOptions]
+    .map(o=>o.value).filter(Boolean);
+
+  const servantNames=servantIds
+    .map(id=>servants.find(x=>x.id===id)?.name).filter(Boolean);
 
   const data={
     familyName:$('familyName').value.trim(),
@@ -703,6 +740,7 @@ $('familyForm').onsubmit=async e=>{
     updatedAt:firebase.firestore.FieldValue.serverTimestamp()
   };
 
+  // اسم الأسرة فقط هو الحقل الإجباري.
   if(!data.familyName){
     $('formError').textContent='اكتبي اسم الأسرة.';
     return;
@@ -711,6 +749,7 @@ $('familyForm').onsubmit=async e=>{
   try{
     const id=$('familyId').value;
     let ref;
+
     if(id){
       ref=db.collection('families').doc(id);
       await ref.update(data);
@@ -720,15 +759,22 @@ $('familyForm').onsubmit=async e=>{
       ref=await db.collection('families').add(data);
     }
 
+    // حفظ الأفراد الموجودين فقط، والسماح بحفظ الأسرة بدون أفراد.
     const old=await ref.collection('members').get();
     const batch=db.batch();
+
     old.docs.forEach(d=>batch.delete(d.ref));
-    members.forEach(m=>batch.set(ref.collection('members').doc(),m));
+
+    members.forEach(m=>{
+      batch.set(ref.collection('members').doc(),m);
+    });
+
     await batch.commit();
 
     resetForm();
     $('formError').style.color='#167647';
     $('formError').textContent='تم الحفظ بنجاح.';
+
   }catch(err){
     $('formError').style.color='#b42318';
     $('formError').textContent='تعذر الحفظ: '+err.message;
