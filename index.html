@@ -63,7 +63,7 @@ textarea{min-height:80px;resize:vertical}
 .small-stat{background:#f7f9fc;border:1px solid var(--line);border-radius:10px;padding:10px}
 .small-stat b{display:block;color:var(--navy);font-size:18px}
 .multi-help{font-size:12px;color:var(--muted);margin-top:5px}
-.filterbar{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.filterbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 @media(max-width:800px){
 .stats{grid-template-columns:repeat(2,1fr)}
 .layout{grid-template-columns:1fr}
@@ -158,6 +158,7 @@ textarea{min-height:80px;resize:vertical}
         <h2 id="formTitle">بيانات الأسرة</h2>
         <form id="familyForm" novalidate>
           <input type="hidden" id="familyId">
+
           <label>اسم الأسرة <span style="color:#b42318">*</span></label>
           <input id="familyName" required>
 
@@ -165,23 +166,26 @@ textarea{min-height:80px;resize:vertical}
           <select id="familyBranch">
             <option value="">اختاري الفرع</option>
           </select>
+
           <label for="familyServants">الخدام المسؤولون عن الأسرة</label>
           <select id="familyServants" multiple size="4"></select>
           <div class="multi-help">يمكن اختيار أكثر من خادم. اضغطي على أسماء الخدام المطلوبة.</div>
 
           <h2 style="margin-top:18px">عنوان الأسرة</h2>
-          <div class="notice">بيانات العنوان اختيارية. يمكنكِ حفظ الأسرة حتى لو لم يتوفر أي عنوان لها.</div>
+          <div class="notice">بيانات العنوان اختيارية بالكامل. يمكنكِ حفظ الأسرة دون إدخال رقم العقار أو الشارع أو الدور.</div>
+
           <div class="row">
             <div>
-              <label>رقم العقار</label>
+              <label>رقم العقار (اختياري)</label>
               <input id="propertyNumber" placeholder="رقم العقار (اختياري)">
             </div>
             <div>
-              <label>الدور</label>
+              <label>الدور (اختياري)</label>
               <input id="floor" placeholder="الدور (اختياري)">
             </div>
           </div>
-          <label>اسم الشارع</label>
+
+          <label>اسم الشارع (اختياري)</label>
           <input id="streetName" placeholder="اسم الشارع (اختياري)">
 
           <div class="row">
@@ -254,7 +258,7 @@ let unsubscribeFamilies = null, unsubscribeBranches = null, unsubscribeServants 
 const stages = ['حضانة','ابتدائي','إعدادي','ثانوي','جامعة','دراسات عليا'];
 
 function toEnglishDigits(value){
-  return String(value??'').replace(/[٠-٩۰-۹]/g, digit => {
+  return String(value).replace(/[٠-٩۰-۹]/g, digit => {
     const code=digit.charCodeAt(0);
     if(code>=0x0660 && code<=0x0669) return String(code-0x0660);
     if(code>=0x06F0 && code<=0x06F9) return String(code-0x06F0);
@@ -262,18 +266,22 @@ function toEnglishDigits(value){
   });
 }
 
-function displayNumber(value){
-  return toEnglishDigits(String(value??0));
+function esc(v){
+  return String(v??'').replace(/[&<>"']/g,c=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
 }
 
 function showLogin(){
   $('loginView').classList.remove('hidden');
   $('appView').classList.add('hidden');
 }
+
 function showApp(){
   $('loginView').classList.add('hidden');
   $('appView').classList.remove('hidden');
 }
+
 function configReady(){
   return window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey &&
     window.FIREBASE_CONFIG.apiKey !== 'PASTE_API_KEY';
@@ -285,6 +293,7 @@ function init(){
     $('loginBtn').disabled=true;
     return;
   }
+
   try{
     firebase.initializeApp(window.FIREBASE_CONFIG);
     auth=firebase.auth();
@@ -303,6 +312,7 @@ function init(){
         showLogin();
         return;
       }
+
       try{
         const doc=await db.collection('users').doc(user.uid).get();
         if(!doc.exists || !['admin','viewer'].includes(doc.data().role)){
@@ -310,6 +320,7 @@ function init(){
           $('loginError').textContent='هذا الحساب غير مضاف إلى مستخدمي الخدمة.';
           return;
         }
+
         currentUser=user;
         userRole=doc.data().role;
         $('who').textContent=(doc.data().displayName||user.email)+' — '+
@@ -337,6 +348,7 @@ $('loginBtn').onclick=async()=>{
     $('loginError').textContent='تعذر تسجيل الدخول. راجعي البريد وكلمة المرور.';
   }
 };
+
 $('logoutBtn').onclick=()=>auth.signOut();
 
 function setPermissions(){
@@ -404,14 +416,17 @@ function renderBranchOptions(){
   const familySelect=$('familyBranch');
   const oldFilter=filter.value||selectedBranch;
   const oldFamily=familySelect.value;
+
   filter.innerHTML='<option value="all">كل الفروع</option>'+
     branches.map(b=>`<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('')+
     '<option value="__none">أسر بدون فرع (قديمة)</option>';
+
   filter.value=(oldFilter==='all'||oldFilter==='__none'||branches.some(b=>b.id===oldFilter))?oldFilter:'all';
   selectedBranch=filter.value;
 
   familySelect.innerHTML='<option value="">اختاري الفرع</option>'+
     branches.map(b=>`<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('');
+
   if(oldFamily && branches.some(b=>b.id===oldFamily)) familySelect.value=oldFamily;
   renderServantOptions();
 }
@@ -419,16 +434,20 @@ function renderBranchOptions(){
 function renderServantOptions(selectedIds=[]){
   const branchId=$('familyBranch').value;
   const allowed=servants.filter(x=>x.branchId===branchId);
+
   $('familyServants').innerHTML=allowed.map(x=>
     `<option value="${esc(x.id)}" ${selectedIds.includes(x.id)?'selected':''}>${esc(x.name)}</option>`
   ).join('');
+
   if(!branchId) $('familyServants').innerHTML='<option disabled>اختاري الفرع أولًا</option>';
   else if(!allowed.length) $('familyServants').innerHTML='<option disabled>لا يوجد خدام مسجلون لهذا الفرع</option>';
 }
+
 $('familyBranch').addEventListener('change',()=>renderServantOptions());
 
 function renderBranchAdmin(){
   if(userRole!=='admin') return;
+
   $('branchList').innerHTML=branches.length?branches.map(b=>{
     const list=servants.filter(x=>x.branchId===b.id);
     return `
@@ -446,6 +465,7 @@ function renderBranchAdmin(){
         </div>
       </div>`;
   }).join(''):'<div class="empty">لم تتم إضافة فروع بعد.</div>';
+
   renderBranchServantStats();
 }
 
@@ -453,10 +473,17 @@ $('addBranchBtn').onclick=async()=>{
   if(userRole!=='admin') return;
   const name=$('newBranchName').value.trim();
   $('branchError').textContent='';
-  if(!name){$('branchError').textContent='اكتبي اسم الفرع أولًا.';return;}
-  if(branches.some(b=>b.name.trim().toLowerCase()===name.toLowerCase())){
-    $('branchError').textContent='اسم الفرع موجود بالفعل.';return;
+
+  if(!name){
+    $('branchError').textContent='اكتبي اسم الفرع أولًا.';
+    return;
   }
+
+  if(branches.some(b=>b.name.trim().toLowerCase()===name.toLowerCase())){
+    $('branchError').textContent='اسم الفرع موجود بالفعل.';
+    return;
+  }
+
   try{
     await db.collection('branches').add({
       name,
@@ -476,18 +503,24 @@ window.renameBranch=async id=>{
   if(userRole!=='admin') return;
   const branch=branches.find(b=>b.id===id);
   if(!branch) return;
+
   const name=prompt('اكتبي الاسم الجديد للفرع:',branch.name);
   if(name===null) return;
+
   const clean=name.trim();
   if(!clean){alert('اسم الفرع لا يمكن أن يكون فارغًا.');return;}
+
   if(branches.some(b=>b.id!==id && b.name.trim().toLowerCase()===clean.toLowerCase())){
-    alert('اسم الفرع موجود بالفعل.');return;
+    alert('اسم الفرع موجود بالفعل.');
+    return;
   }
+
   try{
     await db.collection('branches').doc(id).update({
       name:clean,
       updatedAt:firebase.firestore.FieldValue.serverTimestamp()
     });
+
     const batch=db.batch();
     families.filter(f=>f.branchId===id).forEach(f=>{
       batch.update(db.collection('families').doc(f.id),{branchName:clean});
@@ -502,26 +535,43 @@ window.addServant=async branchId=>{
   if(userRole!=='admin') return;
   const input=$(`servantName-${branchId}`);
   const name=input.value.trim();
+
   if(!name){alert('اكتبي اسم الخادم أولًا.');return;}
+
   if(servants.some(x=>x.branchId===branchId && x.name.trim().toLowerCase()===name.toLowerCase())){
-    alert('اسم الخادم موجود بالفعل في هذا الفرع.');return;
+    alert('اسم الخادم موجود بالفعل في هذا الفرع.');
+    return;
   }
+
   try{
-    await db.collection('servants').add({name,branchId,createdAt:firebase.firestore.FieldValue.serverTimestamp(),createdBy:currentUser.uid});
+    await db.collection('servants').add({
+      name,branchId,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy:currentUser.uid
+    });
     input.value='';
-  }catch(e){alert('تعذرت إضافة الخادم: '+e.message);}
+  }catch(e){
+    alert('تعذرت إضافة الخادم: '+e.message);
+  }
 };
 
 window.renameServant=async id=>{
   if(userRole!=='admin') return;
   const servant=servants.find(x=>x.id===id);
   if(!servant) return;
+
   const name=prompt('اكتبي الاسم الجديد للخادم:',servant.name);
   if(name===null) return;
+
   const clean=name.trim();
   if(!clean){alert('اسم الخادم لا يمكن أن يكون فارغًا.');return;}
+
   try{
-    await db.collection('servants').doc(id).update({name:clean,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await db.collection('servants').doc(id).update({
+      name:clean,
+      updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+
     const batch=db.batch();
     families.filter(f=>(f.servantIds||[]).includes(id)).forEach(f=>{
       const ids=f.servantIds||[];
@@ -529,15 +579,19 @@ window.renameServant=async id=>{
       batch.update(db.collection('families').doc(f.id),{servantNames:names});
     });
     if(families.some(f=>(f.servantIds||[]).includes(id))) await batch.commit();
-  }catch(e){alert('تعذر تعديل اسم الخادم: '+e.message);}
+  }catch(e){
+    alert('تعذر تعديل اسم الخادم: '+e.message);
+  }
 };
 
 function renderBranchServantStats(){
   const host=$('branchServantStats');
   if(!host) return;
+
   host.innerHTML=branches.length?branches.map(b=>{
     const branchFamilies=families.filter(f=>f.branchId===b.id);
     const branchServants=servants.filter(x=>x.branchId===b.id);
+
     return `<div class="branch-item" style="display:block;background:white">
       <b>${esc(b.name)}</b>
       <div class="stat-grid-extra">
@@ -563,15 +617,21 @@ function getVisibleFamilies(){
   return families.filter(f=>f.branchId===selectedBranch);
 }
 
+function displayNumber(value){
+  return toEnglishDigits(String(value));
+}
+
 function render(){
   const q=$('search').value.trim().toLowerCase();
   const visible=getVisibleFamilies();
+
   const filtered=visible.filter(f=>
     (f.familyName||'').toLowerCase().includes(q) || (f.phone||'').includes(q)
   );
 
   let members=0,income=0;
   const counts=Object.fromEntries(stages.map(s=>[s,0]));
+
   visible.forEach(f=>{
     income+=Number(f.monthlyIncome||0);
     (f.members||[]).forEach(m=>{
@@ -592,6 +652,7 @@ function render(){
   const branchLabel=selectedBranch==='all'?'كل الفروع':
     selectedBranch==='__none'?'أسر بدون فرع':
     (branches.find(b=>b.id===selectedBranch)?.name||'فرع');
+
   $('branchSummary').textContent='الإحصائيات المعروضة: '+branchLabel;
 
   $('educationStats').innerHTML=stages.map(s=>
@@ -602,13 +663,12 @@ function render(){
     const branch=branches.find(b=>b.id===f.branchId);
     const branchLabel=branch?.name||f.branchName||'غير محدد';
 
+    // تكوين العنوان من الحقول الموجودة فقط
     const addressParts=[];
     if(f.propertyNumber) addressParts.push('عقار رقم '+esc(f.propertyNumber));
     if(f.streetName) addressParts.push('شارع '+esc(f.streetName));
     if(f.floor) addressParts.push('الدور '+esc(f.floor));
-    const addressLine=addressParts.length
-      ? `<div class="meta"><b>العنوان:</b> ${addressParts.join('، ')}</div>`
-      : '';
+    const addressText=addressParts.join('، ');
 
     return `
       <article class="family">
@@ -621,20 +681,26 @@ function render(){
               ${esc(f.housing||'السكن غير محدد')} ·
               دخل ${displayNumber(Number(f.monthlyIncome||0))}
             </div>
-            ${addressLine}
+
+            ${addressText?`<div class="meta"><b>العنوان:</b> ${addressText}</div>`:''}
+
             <div class="meta"><b>الخدام المسؤولون:</b> ${((f.servantNames||[]).length?(f.servantNames||[]).map(n=>`<span class="pill">${esc(n)}</span>`).join(''):'لم يتم تحديد خدام')}</div>
           </div>
+
           <span class="pill">${displayNumber((f.members||[]).length)} أفراد</span>
         </div>
+
         <div class="members">
           ${(f.members||[]).map(m=>`
             <div class="member">
-              ${esc(m.name||'اسم غير مسجل')} — ${m.age!==null && m.age!==undefined && m.age!==''?displayNumber(m.age)+' سنة':'السن غير محدد'} — ${esc(m.education||'المرحلة غير محددة')}
+              ${esc(m.name||'اسم غير مسجل')} — ${m.age!==null && m.age!==undefined && m.age!==''?esc(displayNumber(m.age))+' سنة':'السن غير محدد'} — ${esc(m.education||'المرحلة غير محددة')}
             </div>
           `).join('')||'<div class="meta">لا يوجد أفراد مسجلون</div>'}
         </div>
+
         ${f.needs?`<div class="note"><b>الاحتياجات:</b> ${esc(f.needs)}</div>`:''}
         ${f.notes?`<div class="meta">ملاحظات: ${esc(f.notes)}</div>`:''}
+
         ${userRole==='admin'?`
           <div class="actions">
             <button class="btn light" onclick="editFamily('${f.id}')">تعديل</button>
@@ -644,16 +710,11 @@ function render(){
   }).join(''):'<div class="empty">لا توجد أسر مطابقة للبحث.</div>';
 }
 
-function esc(v){
-  return String(v??'').replace(/[&<>"']/g,c=>({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
-}
-
 function addMemberRow(m={}){
   const div=document.createElement('div');
   div.className='row member-row';
   div.style.marginBottom='8px';
+
   div.innerHTML=`
     <div>
       <label>اسم الفرد</label>
@@ -670,9 +731,11 @@ function addMemberRow(m={}){
         <button type="button" class="btn danger remove-member">×</button>
       </div>
     </div>`;
+
   div.querySelector('.remove-member').onclick=()=>div.remove();
   $('memberInputs').append(div);
 }
+
 $('addMember').onclick=()=>addMemberRow();
 
 function resetForm(){
@@ -685,14 +748,21 @@ function resetForm(){
   $('floor').value='';
   $('formTitle').textContent='بيانات الأسرة';
   $('formError').textContent='';
+  $('formError').style.color='#b42318';
 }
-$('addBtn').onclick=()=>{resetForm();$('familyName').focus();};
+
+$('addBtn').onclick=()=>{
+  resetForm();
+  $('familyName').focus();
+};
+
 $('cancelBtn').onclick=resetForm;
 $('search').oninput=render;
 
 window.editFamily=id=>{
   const f=families.find(x=>x.id===id);
   if(!f)return;
+
   resetForm();
   $('familyId').value=id;
   $('familyName').value=f.familyName||'';
@@ -714,10 +784,12 @@ window.editFamily=id=>{
 
 window.deleteFamily=async id=>{
   if(!confirm('هل أنتِ متأكدة من حذف الأسرة؟'))return;
+
   try{
     const ref=db.collection('families').doc(id);
     const ms=await ref.collection('members').get();
     const batch=db.batch();
+
     ms.docs.forEach(d=>batch.delete(d.ref));
     batch.delete(ref);
     await batch.commit();
@@ -732,11 +804,14 @@ $('familyForm').onsubmit=async e=>{
   if(userRole!=='admin')return;
 
   const familyName=$('familyName').value.trim();
+
   if(!familyName){
     $('formError').textContent='من فضلك اكتبي اسم الأسرة.';
     $('familyName').focus();
     return;
   }
+
+  // لا توجد شروط إلزامية لرقم العقار أو الشارع أو الدور
 
   const members=[...document.querySelectorAll('.member-row')].map(r=>({
     name:r.querySelector('.m-name').value.trim(),
