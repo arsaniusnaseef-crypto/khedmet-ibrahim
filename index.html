@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
@@ -243,7 +244,9 @@ window.FIREBASE_CONFIG = {
   storageBucket: "khedmet-ibrahim-el-gawhary.firebasestorage.app",
   messagingSenderId: "394268209326",
   appId: "1:394268209326:web:9ad5608291ac153085bd3f"
-};const $ = id => document.getElementById(id);
+};
+
+const $ = id => document.getElementById(id);
 let auth = null, db = null, currentUser = null, userRole = null;
 let families = [], branches = [], servants = [], selectedBranch = 'all';
 let unsubscribeFamilies = null, unsubscribeBranches = null, unsubscribeServants = null;
@@ -509,7 +512,9 @@ window.renameServant=async id=>{
     });
     if(families.some(f=>(f.servantIds||[]).includes(id))) await batch.commit();
   }catch(e){alert('تعذر تعديل اسم الخادم: '+e.message);}
-};function renderBranchServantStats(){
+};
+
+function renderBranchServantStats(){
   const host=$('branchServantStats');
   if(!host) return;
   host.innerHTML=branches.length?branches.map(b=>{
@@ -528,7 +533,6 @@ window.renameServant=async id=>{
     </div>`;
   }).join(''):'<div class="empty">أضيفي الفروع لعرض الإحصائيات.</div>';
 }
-
 $('branchFilter').onchange=()=>{
   selectedBranch=$('branchFilter').value;
   render();
