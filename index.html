@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
@@ -169,6 +168,20 @@ textarea{min-height:80px;resize:vertical}
           <select id="familyServants" multiple size="4"></select>
           <div class="multi-help">يمكن اختيار أكثر من خادم. اضغطي على أسماء الخدام المطلوبة.</div>
 
+          <h2 style="margin-top:18px">عنوان الأسرة</h2>
+          <div class="row">
+            <div>
+              <label>رقم العقار <span style="color:#b42318">*</span></label>
+              <input id="propertyNumber" placeholder="رقم العقار">
+            </div>
+            <div>
+              <label>الدور</label>
+              <input id="floor" placeholder="الدور (اختياري)">
+            </div>
+          </div>
+          <label>اسم الشارع <span style="color:#b42318">*</span></label>
+          <input id="streetName" placeholder="اسم الشارع">
+
           <div class="row">
             <div>
               <label>رقم الهاتف</label>
@@ -230,10 +243,7 @@ window.FIREBASE_CONFIG = {
   storageBucket: "khedmet-ibrahim-el-gawhary.firebasestorage.app",
   messagingSenderId: "394268209326",
   appId: "1:394268209326:web:9ad5608291ac153085bd3f"
-};
-</script>
-<script>
-const $ = id => document.getElementById(id);
+};const $ = id => document.getElementById(id);
 let auth = null, db = null, currentUser = null, userRole = null;
 let families = [], branches = [], servants = [], selectedBranch = 'all';
 let unsubscribeFamilies = null, unsubscribeBranches = null, unsubscribeServants = null;
@@ -499,9 +509,7 @@ window.renameServant=async id=>{
     });
     if(families.some(f=>(f.servantIds||[]).includes(id))) await batch.commit();
   }catch(e){alert('تعذر تعديل اسم الخادم: '+e.message);}
-};
-
-function renderBranchServantStats(){
+};function renderBranchServantStats(){
   const host=$('branchServantStats');
   if(!host) return;
   host.innerHTML=branches.length?branches.map(b=>{
@@ -531,8 +539,7 @@ function getVisibleFamilies(){
   if(selectedBranch==='__none') return families.filter(f=>!f.branchId);
   return families.filter(f=>f.branchId===selectedBranch);
 }
-</script>
-<script>
+
 function render(){
   const q=$('search').value.trim().toLowerCase();
   const visible=getVisibleFamilies();
@@ -579,6 +586,12 @@ function render(){
               ${esc(f.phone||'لا يوجد هاتف')} ·
               ${esc(f.housing||'السكن غير محدد')} ·
               دخل ${Number(f.monthlyIncome||0).toLocaleString('ar-EG')}
+            </div>
+            <div class="meta">
+              <b>العنوان:</b>
+              عقار رقم ${esc(f.propertyNumber||'غير محدد')}،
+              شارع ${esc(f.streetName||'غير محدد')}
+              ${f.floor ? '، الدور '+esc(f.floor) : ''}
             </div>
             <div class="meta"><b>الخدام المسؤولون:</b> ${((f.servantNames||[]).length?(f.servantNames||[]).map(n=>`<span class="pill">${esc(n)}</span>`).join(''):'لم يتم تحديد خدام')}</div>
           </div>
@@ -638,6 +651,9 @@ function resetForm(){
   $('familyId').value='';
   $('memberInputs').innerHTML='';
   $('familyServants').innerHTML='';
+  $('propertyNumber').value='';
+  $('streetName').value='';
+  $('floor').value='';
   $('formTitle').textContent='بيانات الأسرة';
   $('formError').textContent='';
 }
@@ -654,6 +670,9 @@ window.editFamily=id=>{
   $('familyBranch').value=f.branchId||'';
   renderServantOptions(f.servantIds||[]);
   $('phone').value=f.phone||'';
+  $('propertyNumber').value=f.propertyNumber||'';
+  $('streetName').value=f.streetName||'';
+  $('floor').value=f.floor||'';
   $('income').value=f.monthlyIncome||'';
   $('housing').value=f.housing||'';
   $('needs').value=f.needs||'';
@@ -685,8 +704,20 @@ $('familyForm').onsubmit=async e=>{
 
   const familyName=$('familyName').value.trim();
   if(!familyName){
-    $('formError').textContent='اسم الأسرة فقط هو الحقل الإجباري.';
+    $('formError').textContent='من فضلك اكتبي اسم الأسرة.';
     $('familyName').focus();
+    return;
+  }
+
+  if(!$('propertyNumber').value.trim()){
+    $('formError').textContent='رقم العقار حقل إجباري.';
+    $('propertyNumber').focus();
+    return;
+  }
+
+  if(!$('streetName').value.trim()){
+    $('formError').textContent='اسم الشارع حقل إجباري.';
+    $('streetName').focus();
     return;
   }
 
@@ -708,6 +739,9 @@ $('familyForm').onsubmit=async e=>{
     servantIds,
     servantNames,
     phone:$('phone').value.trim(),
+    propertyNumber:$('propertyNumber').value.trim(),
+    streetName:$('streetName').value.trim(),
+    floor:$('floor').value.trim(),
     monthlyIncome:Number($('income').value||0),
     housing:$('housing').value,
     needs:$('needs').value.trim(),
