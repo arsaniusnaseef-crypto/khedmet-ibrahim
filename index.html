@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
@@ -62,7 +63,7 @@ textarea{min-height:80px;resize:vertical}
 .small-stat{background:#f7f9fc;border:1px solid var(--line);border-radius:10px;padding:10px}
 .small-stat b{display:block;color:var(--navy);font-size:18px}
 .multi-help{font-size:12px;color:var(--muted);margin-top:5px}
-.filterbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.filterbar{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:800px){
 .stats{grid-template-columns:repeat(2,1fr)}
 .layout{grid-template-columns:1fr}
@@ -169,18 +170,19 @@ textarea{min-height:80px;resize:vertical}
           <div class="multi-help">يمكن اختيار أكثر من خادم. اضغطي على أسماء الخدام المطلوبة.</div>
 
           <h2 style="margin-top:18px">عنوان الأسرة</h2>
+          <div class="notice">بيانات العنوان اختيارية. يمكنكِ حفظ الأسرة حتى لو لم يتوفر أي عنوان لها.</div>
           <div class="row">
             <div>
-              <label>رقم العقار <span style="color:#b42318">*</span></label>
-              <input id="propertyNumber" placeholder="رقم العقار">
+              <label>رقم العقار</label>
+              <input id="propertyNumber" placeholder="رقم العقار (اختياري)">
             </div>
             <div>
               <label>الدور</label>
               <input id="floor" placeholder="الدور (اختياري)">
             </div>
           </div>
-          <label>اسم الشارع <span style="color:#b42318">*</span></label>
-          <input id="streetName" placeholder="اسم الشارع">
+          <label>اسم الشارع</label>
+          <input id="streetName" placeholder="اسم الشارع (اختياري)">
 
           <div class="row">
             <div>
@@ -251,6 +253,19 @@ let families = [], branches = [], servants = [], selectedBranch = 'all';
 let unsubscribeFamilies = null, unsubscribeBranches = null, unsubscribeServants = null;
 const stages = ['حضانة','ابتدائي','إعدادي','ثانوي','جامعة','دراسات عليا'];
 
+function toEnglishDigits(value){
+  return String(value??'').replace(/[٠-٩۰-۹]/g, digit => {
+    const code=digit.charCodeAt(0);
+    if(code>=0x0660 && code<=0x0669) return String(code-0x0660);
+    if(code>=0x06F0 && code<=0x06F9) return String(code-0x06F0);
+    return digit;
+  });
+}
+
+function displayNumber(value){
+  return toEnglishDigits(String(value??0));
+}
+
 function showLogin(){
   $('loginView').classList.remove('hidden');
   $('appView').classList.add('hidden');
@@ -275,7 +290,8 @@ function init(){
     auth=firebase.auth();
     db=firebase.firestore();
 
-    auth.onAuthStateChanged(async user=>{      if(!user){
+    auth.onAuthStateChanged(async user=>{
+      if(!user){
         currentUser=null;
         userRole=null;
         families=[];
@@ -423,7 +439,7 @@ function renderBranchAdmin(){
             <button type="button" class="btn light" onclick="renameBranch('${b.id}')">تعديل اسم الفرع</button>
           </div>
         </div>
-        <div class="servant-list"><b>الخدام (${list.length}):</b> ${list.length?list.map(x=>`<span class="pill">${esc(x.name)} <button type="button" onclick="renameServant('${x.id}')" title="تعديل" style="border:0;background:none;color:#142b4a;padding:0 2px">✎</button></span>`).join(''):'لم تتم إضافة خدام لهذا الفرع بعد.'}</div>
+        <div class="servant-list"><b>الخدام (${displayNumber(list.length)}):</b> ${list.length?list.map(x=>`<span class="pill">${esc(x.name)} <button type="button" onclick="renameServant('${x.id}')" title="تعديل" style="border:0;background:none;color:#142b4a;padding:0 2px">✎</button></span>`).join(''):'لم تتم إضافة خدام لهذا الفرع بعد.'}</div>
         <div class="servant-add">
           <input id="servantName-${b.id}" placeholder="اسم الخادم الجديد">
           <button type="button" class="btn" onclick="addServant('${b.id}')">+ إضافة خادم</button>
@@ -525,16 +541,18 @@ function renderBranchServantStats(){
     return `<div class="branch-item" style="display:block;background:white">
       <b>${esc(b.name)}</b>
       <div class="stat-grid-extra">
-        <div class="small-stat">عدد الأسر<b>${branchFamilies.length}</b></div>
-        <div class="small-stat">عدد الخدام<b>${branchServants.length}</b></div>
+        <div class="small-stat">عدد الأسر<b>${displayNumber(branchFamilies.length)}</b></div>
+        <div class="small-stat">عدد الخدام<b>${displayNumber(branchServants.length)}</b></div>
       </div>
       ${branchServants.map(x=>{
         const count=branchFamilies.filter(f=>(f.servantIds||[]).includes(x.id)).length;
-        return `<div class="meta" style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:5px 0"><span>${esc(x.name)}</span><b>${count} أسرة</b></div>`;
+        return `<div class="meta" style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:5px 0"><span>${esc(x.name)}</span><b>${displayNumber(count)} أسرة</b></div>`;
       }).join('')}
     </div>`;
   }).join(''):'<div class="empty">أضيفي الفروع لعرض الإحصائيات.</div>';
-  }$('branchFilter').onchange=()=>{
+}
+
+$('branchFilter').onchange=()=>{
   selectedBranch=$('branchFilter').value;
   render();
 };
@@ -562,25 +580,36 @@ function render(){
     });
   });
 
-  $('familiesCount').textContent=visible.length;
-  $('membersCount').textContent=members;
-  $('bridesCount').textContent=visible.reduce((n,f)=>n+Number(f.bridesCount||0),0);
-  $('incomeTotal').textContent=toEnglishDigits(String(income));
-  $('branchesCount').textContent=branches.length;
-  $('servantsCount').textContent=servants.length;
+  $('familiesCount').textContent=displayNumber(visible.length);
+  $('membersCount').textContent=displayNumber(members);
+  $('bridesCount').textContent=displayNumber(visible.reduce((n,f)=>n+Number(f.bridesCount||0),0));
+  $('incomeTotal').textContent=displayNumber(income);
+  $('branchesCount').textContent=displayNumber(branches.length);
+  $('servantsCount').textContent=displayNumber(servants.length);
+
   renderBranchServantStats();
+
   const branchLabel=selectedBranch==='all'?'كل الفروع':
     selectedBranch==='__none'?'أسر بدون فرع':
     (branches.find(b=>b.id===selectedBranch)?.name||'فرع');
   $('branchSummary').textContent='الإحصائيات المعروضة: '+branchLabel;
 
   $('educationStats').innerHTML=stages.map(s=>
-    `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #e5eaf0;padding:7px 0"><span>${s}</span><b>${counts[s]}</b></div>`
+    `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #e5eaf0;padding:7px 0"><span>${s}</span><b>${displayNumber(counts[s])}</b></div>`
   ).join('');
 
   $('familyList').innerHTML=filtered.length?filtered.map(f=>{
     const branch=branches.find(b=>b.id===f.branchId);
     const branchLabel=branch?.name||f.branchName||'غير محدد';
+
+    const addressParts=[];
+    if(f.propertyNumber) addressParts.push('عقار رقم '+esc(f.propertyNumber));
+    if(f.streetName) addressParts.push('شارع '+esc(f.streetName));
+    if(f.floor) addressParts.push('الدور '+esc(f.floor));
+    const addressLine=addressParts.length
+      ? `<div class="meta"><b>العنوان:</b> ${addressParts.join('، ')}</div>`
+      : '';
+
     return `
       <article class="family">
         <div class="family-head">
@@ -590,22 +619,17 @@ function render(){
               الفرع: <b>${esc(branchLabel)}</b> ·
               ${esc(f.phone||'لا يوجد هاتف')} ·
               ${esc(f.housing||'السكن غير محدد')} ·
-              دخل ${toEnglishDigits(String(Number(f.monthlyIncome||0)))}
+              دخل ${displayNumber(Number(f.monthlyIncome||0))}
             </div>
-            <div class="meta">
-              <b>العنوان:</b>
-              عقار رقم ${esc(f.propertyNumber||'غير محدد')}،
-              شارع ${esc(f.streetName||'غير محدد')}
-              ${f.floor ? '، الدور '+esc(f.floor) : ''}
-            </div>
+            ${addressLine}
             <div class="meta"><b>الخدام المسؤولون:</b> ${((f.servantNames||[]).length?(f.servantNames||[]).map(n=>`<span class="pill">${esc(n)}</span>`).join(''):'لم يتم تحديد خدام')}</div>
           </div>
-          <span class="pill">${(f.members||[]).length} أفراد</span>
+          <span class="pill">${displayNumber((f.members||[]).length)} أفراد</span>
         </div>
         <div class="members">
           ${(f.members||[]).map(m=>`
             <div class="member">
-              ${esc(m.name||'اسم غير مسجل')} — ${m.age?esc(String(m.age))+' سنة':'السن غير محدد'} — ${esc(m.education||'المرحلة غير محددة')}
+              ${esc(m.name||'اسم غير مسجل')} — ${m.age!==null && m.age!==undefined && m.age!==''?displayNumber(m.age)+' سنة':'السن غير محدد'} — ${esc(m.education||'المرحلة غير محددة')}
             </div>
           `).join('')||'<div class="meta">لا يوجد أفراد مسجلون</div>'}
         </div>
@@ -618,15 +642,6 @@ function render(){
           </div>`:''}
       </article>`;
   }).join(''):'<div class="empty">لا توجد أسر مطابقة للبحث.</div>';
-}
-
-function toEnglishDigits(value){
-  return String(value).replace(/[٠-٩۰-۹]/g, digit => {
-    const code=digit.charCodeAt(0);
-    if(code>=0x0660 && code<=0x0669) return String(code-0x0660);
-    if(code>=0x06F0 && code<=0x06F9) return String(code-0x06F0);
-    return digit;
-  });
 }
 
 function esc(v){
@@ -647,7 +662,7 @@ function addMemberRow(m={}){
     <div>
       <label>السن والمرحلة</label>
       <div style="display:flex;gap:5px">
-        <input class="m-age" type="number" min="0" placeholder="السن (اختياري)" value="${esc(m.age||'')}" style="width:75px">
+        <input class="m-age" type="number" min="0" placeholder="السن (اختياري)" value="${esc(m.age??'')}" style="width:75px">
         <select class="m-edu">
           <option value="">المرحلة التعليمية (اختياري)</option>
           ${stages.map(s=>`<option value="${s}" ${m.education===s?'selected':''}>${s}</option>`).join('')}
@@ -711,7 +726,7 @@ window.deleteFamily=async id=>{
   }
 };
 
-/* حفظ الأسرة: لا يشترط وجود أفراد، ولا يشترط اسم الفرد أو السن أو المرحلة */
+/* حفظ الأسرة: العنوان اختياري، والأفراد اختياريون */
 $('familyForm').onsubmit=async e=>{
   e.preventDefault();
   if(userRole!=='admin')return;
@@ -720,18 +735,6 @@ $('familyForm').onsubmit=async e=>{
   if(!familyName){
     $('formError').textContent='من فضلك اكتبي اسم الأسرة.';
     $('familyName').focus();
-    return;
-  }
-
-  if(!$('propertyNumber').value.trim()){
-    $('formError').textContent='رقم العقار حقل إجباري.';
-    $('propertyNumber').focus();
-    return;
-  }
-
-  if(!$('streetName').value.trim()){
-    $('formError').textContent='اسم الشارع حقل إجباري.';
-    $('streetName').focus();
     return;
   }
 
