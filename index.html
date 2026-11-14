@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
@@ -268,8 +267,7 @@ function configReady(){
 function init(){
   if(!configReady()){
     $('loginError').textContent='يلزم إعداد ربط Firebase أولًا قبل تسجيل الدخول.';
-    $('loginBtn').disabled=true;
-    return;
+    $('loginBtn').disabled=true;    return;
   }
   try{
     firebase.initializeApp(window.FIREBASE_CONFIG);
@@ -512,9 +510,7 @@ window.renameServant=async id=>{
     });
     if(families.some(f=>(f.servantIds||[]).includes(id))) await batch.commit();
   }catch(e){alert('تعذر تعديل اسم الخادم: '+e.message);}
-};
-
-function renderBranchServantStats(){
+};function renderBranchServantStats(){
   const host=$('branchServantStats');
   if(!host) return;
   host.innerHTML=branches.length?branches.map(b=>{
@@ -533,6 +529,7 @@ function renderBranchServantStats(){
     </div>`;
   }).join(''):'<div class="empty">أضيفي الفروع لعرض الإحصائيات.</div>';
 }
+
 $('branchFilter').onchange=()=>{
   selectedBranch=$('branchFilter').value;
   render();
