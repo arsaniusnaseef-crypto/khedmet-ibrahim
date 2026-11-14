@@ -267,17 +267,15 @@ function configReady(){
 function init(){
   if(!configReady()){
     $('loginError').textContent='يلزم إعداد ربط Firebase أولًا قبل تسجيل الدخول.';
-    $('loginBtn').disabled=true;    return;
+    $('loginBtn').disabled=true;
+    return;
   }
   try{
     firebase.initializeApp(window.FIREBASE_CONFIG);
     auth=firebase.auth();
     db=firebase.firestore();
 
-    auth.onAuthStateChanged(async user=>{
-      if(!user){
-        currentUser=null;
-        if(unsubscribeFamilies) unsubscribeFamilies();
+    auth.onAuthStateChanged(async user=>{        if(unsubscribeFamilies) unsubscribeFamilies();
         if(unsubscribeBranches) unsubscribeBranches();
         if(unsubscribeServants) unsubscribeServants();
         showLogin();
@@ -510,7 +508,9 @@ window.renameServant=async id=>{
     });
     if(families.some(f=>(f.servantIds||[]).includes(id))) await batch.commit();
   }catch(e){alert('تعذر تعديل اسم الخادم: '+e.message);}
-};function renderBranchServantStats(){
+};
+
+function renderBranchServantStats(){
   const host=$('branchServantStats');
   if(!host) return;
   host.innerHTML=branches.length?branches.map(b=>{
@@ -528,9 +528,7 @@ window.renameServant=async id=>{
       }).join('')}
     </div>`;
   }).join(''):'<div class="empty">أضيفي الفروع لعرض الإحصائيات.</div>';
-}
-
-$('branchFilter').onchange=()=>{
+  }$('branchFilter').onchange=()=>{
   selectedBranch=$('branchFilter').value;
   render();
 };
@@ -561,7 +559,7 @@ function render(){
   $('familiesCount').textContent=visible.length;
   $('membersCount').textContent=members;
   $('bridesCount').textContent=visible.reduce((n,f)=>n+Number(f.bridesCount||0),0);
-  $('incomeTotal').textContent=income.toLocaleString('ar-EG');
+  $('incomeTotal').textContent=income.toLocaleString('en-US');
   $('branchesCount').textContent=branches.length;
   $('servantsCount').textContent=servants.length;
   renderBranchServantStats();
@@ -586,7 +584,7 @@ function render(){
               الفرع: <b>${esc(branchLabel)}</b> ·
               ${esc(f.phone||'لا يوجد هاتف')} ·
               ${esc(f.housing||'السكن غير محدد')} ·
-              دخل ${Number(f.monthlyIncome||0).toLocaleString('ar-EG')}
+              دخل ${Number(f.monthlyIncome||0).toLocaleString('en-US')}
             </div>
             <div class="meta">
               <b>العنوان:</b>
