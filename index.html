@@ -8,882 +8,1197 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--navy:#142b4a;--navy2:#203e63;--gold:#c9a96e;--bg:#f3f6fa;--ink:#1d2939;--muted:#718096;--line:#e5eaf0;--white:#fff;--red:#b42318}
+:root{--navy:#142b4a;--navy2:#203e63;--gold:#c9a96e;--bg:#f3f6fa;--ink:#1d2939;--muted:#718096;--line:#e5eaf0;--white:#fff;--red:#b42318;--green:#167647}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);font-family:Cairo,Tahoma,sans-serif;color:var(--ink)}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
 .hidden{display:none!important}
-.shell{max-width:1200px;margin:auto;padding:22px}
+.shell{max-width:1250px;margin:auto;padding:18px}
 .top{background:var(--navy);color:white;padding:18px 22px;border-radius:18px;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .brand{font-size:22px;font-weight:800}
-.sub{font-size:13px;color:#d4deeb}
-.panel,.stat,.login{background:white;border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 24px #142b4a0b}
+.sub,.status{font-size:13px;color:#d4deeb}
+.panel,.stat,.login{background:white;border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 24px #142b4a0b}
 .login{max-width:430px;margin:8vh auto;padding:28px}
 .login h1{text-align:center;color:var(--navy);margin:4px 0}
 .login p{text-align:center;color:var(--muted)}
 label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}
-input,select,textarea{width:100%;border:1px solid #d5dde7;border-radius:11px;padding:11px;background:#fff;color:var(--ink)}
-textarea{min-height:80px;resize:vertical}
-.btn{border:0;border-radius:11px;padding:10px 16px;background:var(--navy);color:white;font-weight:700}
+input,select,textarea{width:100%;border:1px solid #d5dde7;border-radius:10px;padding:10px;background:#fff;color:var(--ink)}
+textarea{min-height:75px;resize:vertical}
+.btn{border:0;border-radius:10px;padding:9px 14px;background:var(--navy);color:white;font-weight:700}
 .btn.light{background:#edf2f7;color:var(--navy)}
 .btn.gold{background:var(--gold);color:#1d2939}
 .btn.danger{background:#fff0ef;color:var(--red)}
+.btn.success{background:#e9f7ef;color:var(--green)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .login .btn{width:100%;margin-top:18px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}
-.stat{padding:16px}
+.notice{padding:11px;border-radius:10px;background:#fff8e9;color:#76551e;font-size:13px;margin:10px 0}
+.error{color:var(--red);font-size:13px;margin-top:8px}
+.ok{color:var(--green);font-size:13px;margin-top:8px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin:16px 0}
+.stat{padding:13px}
 .stat small{color:var(--muted)}
-.stat strong{display:block;font-size:26px;color:var(--navy);direction:ltr;unicode-bidi:isolate;text-align:right}
-.layout{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
-.panel{padding:18px;margin-bottom:16px}
-.panel h2{font-size:18px;color:var(--navy);margin:0 0 14px}
-.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
-.toolbar input{flex:1;min-width:180px}
-.family{border:1px solid var(--line);border-radius:13px;padding:13px;margin:9px 0;background:#fff}
+.stat strong{display:block;font-size:24px;color:var(--navy);direction:ltr;unicode-bidi:isolate}
+.panel{padding:16px;margin-bottom:14px}
+.panel h2{font-size:18px;color:var(--navy);margin:0 0 12px}
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:15px 0}
+.tab{border:1px solid var(--line);background:#fff;color:var(--navy);padding:9px 13px;border-radius:10px;font-weight:700}
+.tab.active{background:var(--navy);color:#fff}
+.page{display:none}
+.page.active{display:block}
+.layout{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:11px}
+.toolbar input{flex:1;min-width:160px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.filterbar{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.family,.record,.branch-item{border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;background:#fff}
 .family-head{display:flex;justify-content:space-between;gap:10px;align-items:center}
 .family h3{margin:0;color:var(--navy);font-size:16px}
-.meta{font-size:13px;color:var(--muted);margin-top:5px}
-.pill{display:inline-block;border-radius:30px;padding:3px 9px;background:#edf2f7;color:var(--navy);font-size:12px;margin:3px}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.members{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+.meta{font-size:12px;color:var(--muted);margin-top:5px}
+.pill{display:inline-block;border-radius:30px;padding:3px 9px;background:#edf2f7;color:var(--navy);font-size:12px;margin:2px}
+.members{margin-top:9px;border-top:1px solid var(--line);padding-top:7px}
 .member{font-size:13px;padding:5px 0;border-bottom:1px dashed var(--line)}
-.note{background:#fff8e9;padding:10px;border-radius:10px;font-size:13px;margin-top:8px}
-.empty{text-align:center;color:var(--muted);padding:24px}
-.notice{padding:12px;border-radius:10px;background:#fff8e9;color:#76551e;font-size:13px;margin:12px 0}
-.status{font-size:13px;color:#d4deeb}
-.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.note{background:#fff8e9;padding:9px;border-radius:9px;font-size:13px;margin-top:8px}
+.empty{text-align:center;color:var(--muted);padding:22px}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
 .foot{text-align:center;color:var(--muted);font-size:12px;padding:15px}
-.branch-item{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--line);border-radius:11px;padding:9px 12px;margin:7px 0}
-.branch-tools{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
-.servant-list{font-size:13px;color:var(--muted);margin-top:8px}
-.servant-add{display:flex;gap:7px;margin-top:9px}
-.servant-add input{flex:1;min-width:120px}
-.stat-grid-extra{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:14px}
-.small-stat{background:#f7f9fc;border:1px solid var(--line);border-radius:10px;padding:10px}
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+.small-stat{background:#f7f9fc;border:1px solid var(--line);border-radius:9px;padding:10px}
 .small-stat b{display:block;color:var(--navy);font-size:18px}
-.multi-help{font-size:12px;color:var(--muted);margin-top:5px}
-.filterbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.multi-help{font-size:12px;color:var(--muted);margin-top:4px}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:9px;text-align:right;white-space:nowrap}
+th{background:#f7f9fc;color:var(--navy)}
+.badge{display:inline-block;padding:3px 8px;border-radius:20px;background:#edf2f7;font-size:12px}
+.badge.done{background:#e9f7ef;color:var(--green)}
+.badge.pending{background:#fff8e9;color:#76551e}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.section-title{margin:16px 0 8px;color:var(--navy);font-weight:800}
 @media(max-width:800px){
-.stats{grid-template-columns:repeat(2,1fr)}
-.layout{grid-template-columns:1fr}
-.shell{padding:12px}
-.top{border-radius:13px}
-.brand{font-size:18px}
+ .stats{grid-template-columns:repeat(2,1fr)}
+ .layout{grid-template-columns:1fr}
+ .shell{padding:10px}
+ .top{border-radius:12px}
+ .brand{font-size:18px}
 }
-@media(max-width:420px){
-.row,.filterbar{grid-template-columns:1fr}
-.family-head{align-items:flex-start;flex-direction:column}
+@media(max-width:480px){
+ .row,.filterbar,.form-grid{grid-template-columns:1fr}
+ .family-head{align-items:flex-start;flex-direction:column}
+ .tab{font-size:12px;padding:8px 10px}
+}
+@media print{
+ body{background:#fff}
+ .top,.tabs,.no-print,.actions,.btn{display:none!important}
+ .panel,.stat{box-shadow:none}
+ .page{display:none!important}
+ .page.active{display:block!important}
 }
 </style>
 </head>
 <body>
 
 <div id="loginView" class="shell">
-  <div class="login">
-    <div style="text-align:center;font-size:38px">🤝</div>
-    <h1>خدمة إبراهيم الجوهري</h1>
-    <p>نظام إدارة ومتابعة الأسر</p>
-    <div class="notice">الدخول متاح للحسابات التي ينشئها مسؤول النظام فقط.</div>
-    <label>البريد الإلكتروني</label>
-    <input id="email" type="email" autocomplete="username" placeholder="name@example.com">
-    <label>كلمة المرور</label>
-    <input id="password" type="password" autocomplete="current-password" placeholder="كلمة المرور">
-    <button class="btn" id="loginBtn">تسجيل الدخول</button>
-    <div id="loginError" style="color:#b42318;text-align:center;margin-top:10px"></div>
-  </div>
+ <div class="login">
+  <div style="text-align:center;font-size:38px">🤝</div>
+  <h1>خدمة إبراهيم الجوهري</h1>
+  <p>نظام إدارة ومتابعة الخدمة</p>
+  <div class="notice">الدخول متاح للحسابات المعتمدة فقط.</div>
+  <label>البريد الإلكتروني</label>
+  <input id="email" type="email" autocomplete="username" placeholder="name@example.com">
+  <label>كلمة المرور</label>
+  <input id="password" type="password" autocomplete="current-password">
+  <button class="btn" id="loginBtn">تسجيل الدخول</button>
+  <div id="loginError" class="error"></div>
+ </div>
 </div>
 
 <div id="appView" class="shell hidden">
-  <header class="top">
-    <div>
-      <div class="brand">خدمة إبراهيم الجوهري</div>
-      <div class="sub">نظام إدارة ومتابعة الأسر</div>
-    </div>
-    <div style="text-align:left">
-      <div id="who" class="status"></div>
-      <button class="btn light" id="logoutBtn" style="margin-top:8px">تسجيل الخروج</button>
-    </div>
-  </header>
-
-  <div class="panel" style="margin-top:16px">
-    <div class="filterbar">
-      <div>
-        <label for="branchFilter">عرض بيانات الفرع</label>
-        <select id="branchFilter"><option value="all">كل الفروع</option></select>
-      </div>
-      <div>
-        <label>ملخص العرض</label>
-        <div id="branchSummary" class="notice" style="margin:0">كل الفروع</div>
-      </div>
-    </div>
+ <header class="top">
+  <div>
+   <div class="brand">خدمة إبراهيم الجوهري</div>
+   <div class="sub">نظام إدارة ومتابعة الخدمة</div>
   </div>
+  <div style="text-align:left">
+   <div id="who" class="status"></div>
+   <button class="btn light" id="logoutBtn" style="margin-top:7px">تسجيل الخروج</button>
+  </div>
+ </header>
 
+ <nav class="tabs no-print">
+  <button class="tab active" data-page="familiesPage">الأسر</button>
+  <button class="tab" data-page="beneficiariesPage">المستفيدون والمساعدات</button>
+  <button class="tab" data-page="blessingsPage">البركة الشهرية</button>
+  <button class="tab" data-page="handoversPage">التسليم اليومي</button>
+  <button class="tab admin-viewer" data-page="reportsPage">التقارير</button>
+  <button class="tab admin-only" data-page="branchesPage">الفروع والخدام</button>
+ </nav>
+
+ <section id="familiesPage" class="page active">
+  <div class="panel">
+   <div class="filterbar">
+    <div><label>عرض بيانات الفرع</label><select id="branchFilter"><option value="all">كل الفروع</option></select></div>
+    <div><label>ملخص العرض</label><div id="branchSummary" class="notice" style="margin:0">كل الفروع</div></div>
+   </div>
+  </div>
   <div class="stats">
-    <div class="stat"><small>إجمالي الأسر</small><strong id="familiesCount">0</strong></div>
-    <div class="stat"><small>إجمالي الأفراد</small><strong id="membersCount">0</strong></div>
-    <div class="stat"><small>العرائس</small><strong id="bridesCount">0</strong></div>
-    <div class="stat"><small>إجمالي الدخل الشهري</small><strong id="incomeTotal" dir="ltr">0</strong></div>
-    <div class="stat"><small>عدد الفروع</small><strong id="branchesCount">0</strong></div>
-    <div class="stat"><small>عدد الخدام</small><strong id="servantsCount">0</strong></div>
+   <div class="stat"><small>إجمالي الأسر</small><strong id="familiesCount">0</strong></div>
+   <div class="stat"><small>إجمالي الأفراد</small><strong id="membersCount">0</strong></div>
+   <div class="stat"><small>العرائس</small><strong id="bridesCount">0</strong></div>
+   <div class="stat"><small>إجمالي الدخل الشهري</small><strong id="incomeTotal">0</strong></div>
+   <div class="stat"><small>عدد الفروع</small><strong id="branchesCount">0</strong></div>
+   <div class="stat"><small>عدد الخدام</small><strong id="servantsCount">0</strong></div>
   </div>
-
-  <section id="branchAdminPanel" class="panel hidden">
-    <h2>إدارة الفروع</h2>
-    <div class="notice">أضيفي أسماء الفروع هنا. تعديل اسم الفرع يحدّث الاسم الظاهر للأسر المرتبطة به. لا تحذفي أي فرع مستخدم.</div>
-    <div class="toolbar">
-      <input id="newBranchName" placeholder="اكتبي اسم الفرع الجديد">
-      <button class="btn" id="addBranchBtn" type="button">+ إضافة فرع</button>
-    </div>
-    <div id="branchList"><div class="empty">جارٍ تحميل الفروع...</div></div>
-    <div class="panel" style="background:#f8fafc;margin-top:14px;margin-bottom:0">
-      <h2>إحصائيات الفروع والخدام</h2>
-      <div id="branchServantStats"></div>
-    </div>
-    <div id="branchError" style="color:#b42318;margin-top:8px"></div>
-  </section>
-
   <div class="layout">
-    <section class="panel">
-      <h2>قاعدة بيانات الأسر</h2>
-      <div class="toolbar">
-        <input id="search" placeholder="ابحث باسم الأسرة أو الهاتف...">
-        <button class="btn" id="addBtn">+ إضافة أسرة</button>
+   <section class="panel">
+    <h2>قاعدة بيانات الأسر</h2>
+    <div class="toolbar"><input id="search" placeholder="ابحث باسم الأسرة أو الهاتف"><button class="btn admin-only" id="addBtn">+ إضافة أسرة</button></div>
+    <div id="familyList" class="empty">جارٍ تحميل البيانات...</div>
+   </section>
+   <section>
+    <div class="panel admin-only" id="familyFormPanel">
+     <h2 id="formTitle">بيانات الأسرة</h2>
+     <form id="familyForm" novalidate>
+      <input type="hidden" id="familyId">
+      <label>اسم الأسرة *</label><input id="familyName" required>
+      <label>اسم الفرع</label><select id="familyBranch"><option value="">اختاري الفرع</option></select>
+      <label>الخدام المسؤولون عن الأسرة</label><select id="familyServants" multiple size="4"></select>
+      <div class="multi-help">يمكن اختيار أكثر من خادم من خدام الفرع.</div>
+      <div class="section-title">عنوان الأسرة – جميع الحقول اختيارية</div>
+      <div class="row">
+       <div><label>رقم العقار</label><input id="propertyNumber"></div>
+       <div><label>الدور</label><input id="floor"></div>
       </div>
-      <div id="familyList" class="empty">جارٍ تحميل البيانات...</div>
-    </section>
-
-    <section>
-      <div class="panel">
-        <h2 id="formTitle">بيانات الأسرة</h2>
-        <form id="familyForm" novalidate>
-          <input type="hidden" id="familyId">
-
-          <label>اسم الأسرة <span style="color:#b42318">*</span></label>
-          <input id="familyName" required>
-
-          <label>اسم الفرع</label>
-          <select id="familyBranch">
-            <option value="">اختاري الفرع</option>
-          </select>
-
-          <label for="familyServants">الخدام المسؤولون عن الأسرة</label>
-          <select id="familyServants" multiple size="4"></select>
-          <div class="multi-help">يمكن اختيار أكثر من خادم. اضغطي على أسماء الخدام المطلوبة.</div>
-
-          <h2 style="margin-top:18px">عنوان الأسرة</h2>
-          <div class="notice">بيانات العنوان اختيارية بالكامل. يمكنكِ حفظ الأسرة دون إدخال رقم العقار أو الشارع أو الدور.</div>
-
-          <div class="row">
-            <div>
-              <label>رقم العقار (اختياري)</label>
-              <input id="propertyNumber" placeholder="رقم العقار (اختياري)">
-            </div>
-            <div>
-              <label>الدور (اختياري)</label>
-              <input id="floor" placeholder="الدور (اختياري)">
-            </div>
-          </div>
-
-          <label>اسم الشارع (اختياري)</label>
-          <input id="streetName" placeholder="اسم الشارع (اختياري)">
-
-          <div class="row">
-            <div>
-              <label>رقم الهاتف</label>
-              <input id="phone" inputmode="tel">
-            </div>
-            <div>
-              <label>الدخل الشهري</label>
-              <input id="income" type="number" min="0">
-            </div>
-          </div>
-
-          <label>السكن</label>
-          <select id="housing">
-            <option value="">اختاري</option>
-            <option>تمليك</option>
-            <option>إيجار</option>
-            <option>مع الأقارب</option>
-            <option>أخرى</option>
-          </select>
-
-          <label>الاحتياجات</label>
-          <textarea id="needs"></textarea>
-
-          <label>ملاحظات</label>
-          <textarea id="notes"></textarea>
-
-          <h2 style="margin-top:18px">أفراد الأسرة</h2>
-          <div class="notice">إضافة أفراد الأسرة اختيارية. لو الأسرة ليس لديها أطفال أو لا تتوفر بيانات الأفراد، اتركي هذا القسم فارغًا واحفظي الأسرة عادي.</div>
-          <div id="memberInputs"></div>
-          <button type="button" class="btn light" id="addMember">+ إضافة فرد</button>
-
-          <div class="actions">
-            <button class="btn" id="saveBtn" type="submit">حفظ الأسرة</button>
-            <button class="btn light" id="cancelBtn" type="button">إلغاء</button>
-          </div>
-          <div id="formError" style="color:#b42318;margin-top:8px"></div>
-        </form>
+      <label>اسم الشارع</label><input id="streetName">
+      <div class="row">
+       <div><label>رقم الهاتف</label><input id="phone" inputmode="tel"></div>
+       <div><label>الدخل الشهري</label><input id="income" type="number" min="0"></div>
       </div>
-
-      <div class="panel">
-        <h2>توزيع الأفراد حسب المرحلة التعليمية</h2>
-        <div id="educationStats"></div>
-      </div>
-    </section>
+      <label>نوع السكن</label>
+      <select id="housing"><option value="">اختاري</option><option>تمليك</option><option>إيجار</option><option>مع الأقارب</option><option>أخرى</option></select>
+      <label>الاحتياجات</label><textarea id="needs"></textarea>
+      <label>ملاحظات</label><textarea id="notes"></textarea>
+      <div class="section-title">أفراد الأسرة</div>
+      <div id="memberInputs"></div>
+      <button type="button" class="btn light" id="addMember">+ إضافة فرد</button>
+      <div class="actions"><button class="btn" id="saveBtn" type="submit">حفظ الأسرة</button><button class="btn light" id="cancelBtn" type="button">إلغاء</button></div>
+      <div id="formError" class="error"></div>
+     </form>
+    </div>
+    <div class="panel"><h2>توزيع الأفراد حسب المرحلة التعليمية</h2><div id="educationStats"></div></div>
+   </section>
   </div>
+ </section>
 
-  <div class="foot">بيانات الخدمة سرية ومخصصة للمستخدمين المصرح لهم فقط.</div>
+ <section id="beneficiariesPage" class="page">
+  <div class="layout">
+   <section class="panel">
+    <h2>المستفيدون من المساعدات الخاصة</h2>
+    <div class="toolbar"><input id="beneficiarySearch" placeholder="بحث باسم المستفيد أو الهاتف"><button class="btn" id="addBeneficiaryBtn">+ مستفيد جديد</button></div>
+    <div id="beneficiaryList" class="empty">جارٍ تحميل المستفيدين...</div>
+   </section>
+   <section class="panel">
+    <h2 id="beneficiaryFormTitle">بيانات المستفيد</h2>
+    <form id="beneficiaryForm">
+     <input type="hidden" id="beneficiaryId">
+     <label>اسم المستفيد *</label><input id="beneficiaryName" required>
+     <label>رقم الهاتف</label><input id="beneficiaryPhone" inputmode="tel">
+     <label>العنوان</label><input id="beneficiaryAddress">
+     <label>سبب الاستفادة / الاحتياج</label><textarea id="beneficiaryReason"></textarea>
+     <label>ملاحظات</label><textarea id="beneficiaryNotes"></textarea>
+     <div class="actions"><button class="btn" type="submit" id="saveBeneficiaryBtn">حفظ المستفيد</button><button class="btn light" type="button" id="cancelBeneficiaryBtn">إلغاء</button></div>
+     <div id="beneficiaryError" class="error"></div>
+    </form>
+    <div class="section-title">تسجيل مساعدة للمستفيد</div>
+    <form id="specialAidForm">
+     <label>المستفيد</label><select id="aidBeneficiary" required><option value="">اختاري المستفيد</option></select>
+     <div class="row"><div><label>نوع المساعدة</label><input id="aidType" placeholder="مالية / غذائية / علاجية..." required></div><div><label>التاريخ</label><input id="aidDate" type="date" required></div></div>
+     <div class="row"><div><label>المبلغ (إن وجد)</label><input id="aidAmount" type="number" min="0"></div><div><label>الكمية (إن وجدت)</label><input id="aidQuantity"></div></div>
+     <label>تفاصيل المساعدة</label><textarea id="aidDescription"></textarea>
+     <button class="btn" type="submit">حفظ المساعدة</button>
+     <div id="aidError" class="error"></div>
+    </form>
+    <div class="section-title">سجل مساعدات المستفيد</div>
+    <div id="beneficiaryAidHistory" class="empty">اختاري مستفيدًا لعرض سجله.</div>
+   </section>
+  </div>
+ </section>
+
+ <section id="blessingsPage" class="page">
+  <div class="layout">
+   <section class="panel">
+    <h2>البركة الشهرية</h2>
+    <div class="filterbar">
+     <div><label>القسم</label><select id="blessingDepartment"><option value="families">الأسر</option><option value="beneficiaries">المستفيدون</option></select></div>
+     <div><label>الشهر</label><input id="blessingMonth" type="month"></div>
+    </div>
+    <div id="blessingList" class="empty">اختاري الشهر لعرض السجلات.</div>
+   </section>
+   <section class="panel">
+    <h2>إضافة / تعديل بركة شهرية</h2>
+    <form id="blessingForm">
+     <input type="hidden" id="blessingId">
+     <label>القسم</label><select id="blessingDepartmentForm"><option value="families">الأسر</option><option value="beneficiaries">المستفيدون</option></select>
+     <label>المستفيد</label><select id="blessingBeneficiary" required><option value="">اختاري المستفيد</option></select>
+     <div class="row"><div><label>الشهر</label><input id="blessingMonthForm" type="month" required></div><div><label>المبلغ</label><input id="blessingAmount" type="number" min="0"></div></div>
+     <div class="row"><div><label>الحالة</label><select id="blessingStatus"><option value="pending">قيد الانتظار</option><option value="done">تم التسليم</option></select></div><div><label>تاريخ التسليم</label><input id="blessingDate" type="date"></div></div>
+     <label>ملاحظات</label><textarea id="blessingNotes"></textarea>
+     <div class="actions"><button class="btn" type="submit">حفظ البركة</button><button class="btn light" type="button" id="cancelBlessingBtn">إلغاء</button></div>
+     <div id="blessingError" class="error"></div>
+    </form>
+   </section>
+  </div>
+ </section>
+
+ <section id="handoversPage" class="page">
+  <div class="layout">
+   <section class="panel">
+    <h2>سجل التسليم اليومي</h2>
+    <div class="filterbar">
+     <div><label>من تاريخ</label><input id="handoverFrom" type="date"></div>
+     <div><label>إلى تاريخ</label><input id="handoverTo" type="date"></div>
+    </div>
+    <div id="handoverList" class="empty">جارٍ تحميل التسليمات...</div>
+   </section>
+   <section class="panel">
+    <h2>تسجيل تسليم جديد / تعديل</h2>
+    <form id="handoverForm">
+     <input type="hidden" id="handoverId">
+     <div class="row"><div><label>التاريخ</label><input id="handoverDate" type="date" required></div><div><label>القسم</label><select id="handoverDepartment"><option value="families">الأسر</option><option value="beneficiaries">المستفيدون</option></select></div></div>
+     <label>المستفيد</label><select id="handoverBeneficiary" required><option value="">اختاري المستفيد</option></select>
+     <div class="row"><div><label>نوع المساعدة</label><input id="handoverType" required></div><div><label>المبلغ</label><input id="handoverAmount" type="number" min="0"></div></div>
+     <div class="row"><div><label>الكمية</label><input id="handoverQuantity"></div><div><label>اسم الخادم المسلم</label><input id="handoverServant" placeholder="اكتبي اسم الخادم" required></div></div>
+     <label>الوصف</label><textarea id="handoverDescription"></textarea>
+     <div class="actions"><button class="btn" type="submit">حفظ التسليم</button><button class="btn light" type="button" id="cancelHandoverBtn">إلغاء</button></div>
+     <div id="handoverError" class="error"></div>
+    </form>
+   </section>
+  </div>
+ </section>
+
+ <section id="reportsPage" class="page">
+  <div class="panel">
+   <h2>التقارير والإحصائيات</h2>
+   <div class="filterbar">
+    <div><label>من تاريخ</label><input id="reportFrom" type="date"></div>
+    <div><label>إلى تاريخ</label><input id="reportTo" type="date"></div>
+   </div>
+   <div class="toolbar" style="margin-top:12px">
+    <select id="reportDepartment"><option value="all">كل الأقسام</option><option value="families">الأسر</option><option value="beneficiaries">المستفيدون</option></select>
+    <button class="btn" id="generateReportBtn">إنشاء التقرير</button>
+    <button class="btn light" id="printReportBtn">طباعة التقرير</button>
+    <button class="btn light" id="exportReportBtn">تصدير CSV</button>
+   </div>
+   <div id="reportResults" class="empty">حددي الفترة ثم اضغطي إنشاء التقرير.</div>
+  </div>
+ </section>
+
+ <section id="branchesPage" class="page">
+  <div class="panel">
+   <h2>إدارة الفروع والخدام</h2>
+   <div class="toolbar"><input id="newBranchName" placeholder="اسم الفرع الجديد"><button class="btn" id="addBranchBtn">+ إضافة فرع</button></div>
+   <div id="branchList" class="empty">جارٍ تحميل الفروع...</div>
+   <div id="branchServantStats"></div>
+   <div id="branchError" class="error"></div>
+  </div>
+ </section>
+
+ <div class="foot">بيانات الخدمة سرية ومخصصة للمستخدمين المصرح لهم فقط.</div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
 <script>
 window.FIREBASE_CONFIG = {
-  apiKey: "AIzaSyCsFBKh8rx1fUq_LmbCu7QLwRcY932oJVs",
-  authDomain: "khedmet-ibrahim-el-gawhary.firebaseapp.com",
-  projectId: "khedmet-ibrahim-el-gawhary",
-  storageBucket: "khedmet-ibrahim-el-gawhary.firebasestorage.app",
-  messagingSenderId: "394268209326",
-  appId: "1:394268209326:web:9ad5608291ac153085bd3f"
+ apiKey:"AIzaSyCsFBKh8rx1fUq_LmbCu7QLwRcY932oJVs",
+ authDomain:"khedmet-ibrahim-el-gawhary.firebaseapp.com",
+ projectId:"khedmet-ibrahim-el-gawhary",
+ storageBucket:"khedmet-ibrahim-el-gawhary.firebasestorage.app",
+ messagingSenderId:"394268209326",
+ appId:"1:394268209326:web:9ad5608291ac153085bd3f"
 };
 
-const $ = id => document.getElementById(id);
-let auth = null, db = null, currentUser = null, userRole = null;
-let families = [], branches = [], servants = [], selectedBranch = 'all';
-let unsubscribeFamilies = null, unsubscribeBranches = null, unsubscribeServants = null;
-const stages = ['حضانة','ابتدائي','إعدادي','ثانوي','جامعة','دراسات عليا'];
-
-function toEnglishDigits(value){
-  return String(value).replace(/[٠-٩۰-۹]/g, digit => {
-    const code=digit.charCodeAt(0);
-    if(code>=0x0660 && code<=0x0669) return String(code-0x0660);
-    if(code>=0x06F0 && code<=0x06F9) return String(code-0x06F0);
-    return digit;
-  });
-}
+const $=id=>document.getElementById(id);
+let auth,db,currentUser=null,userRole=null;
+let families=[],branches=[],servants=[];
+let beneficiaries=[],aidRecords=[],blessings=[],handovers=[];
+let selectedBranch="all";
+let unsubscribers=[];
+const stages=["حضانة","ابتدائي","إعدادي","ثانوي","جامعة","دراسات عليا"];
 
 function esc(v){
-  return String(v??'').replace(/[&<>"']/g,c=>({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
+ return String(v??"").replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ }[c]));
 }
+function num(v){return Number(v||0).toLocaleString("en-US")}
+function today(){
+ const d=new Date(),z=d.getTimezoneOffset()*60000;
+ return new Date(Date.now()-z).toISOString().slice(0,10);
+}
+function msg(id,text,ok=false){
+ const el=$(id);if(!el)return;
+ el.textContent=text;
+ el.className=ok?"ok":"error";
+}
+function isAdmin(){return userRole==="admin"}
+function isViewer(){return userRole==="viewer"}
+function isStaff(){return userRole==="staff"}
+function canEditService(){return isAdmin()||isStaff()}
+function canDelete(){return isAdmin()}
+function serverTime(){return firebase.firestore.FieldValue.serverTimestamp()}
 
 function showLogin(){
-  $('loginView').classList.remove('hidden');
-  $('appView').classList.add('hidden');
+ $("loginView").classList.remove("hidden");
+ $("appView").classList.add("hidden");
 }
-
 function showApp(){
-  $('loginView').classList.add('hidden');
-  $('appView').classList.remove('hidden');
+ $("loginView").classList.add("hidden");
+ $("appView").classList.remove("hidden");
 }
-
-function configReady(){
-  return window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey &&
-    window.FIREBASE_CONFIG.apiKey !== 'PASTE_API_KEY';
+function setPermissions(){
+ document.querySelectorAll(".admin-only").forEach(e=>{
+  e.classList.toggle("hidden",!isAdmin());
+ });
+ document.querySelectorAll(".admin-viewer").forEach(e=>{
+  e.classList.toggle("hidden",isStaff());
+ });
+ $("familyFormPanel").classList.toggle("hidden",!isAdmin());
 }
 
 function init(){
-  if(!configReady()){
-    $('loginError').textContent='يلزم إعداد ربط Firebase أولًا قبل تسجيل الدخول.';
-    $('loginBtn').disabled=true;
-    return;
-  }
+ try{
+  if(!firebase.apps.length)firebase.initializeApp(window.FIREBASE_CONFIG);
+  auth=firebase.auth();db=firebase.firestore();
 
-  try{
-    firebase.initializeApp(window.FIREBASE_CONFIG);
-    auth=firebase.auth();
-    db=firebase.firestore();
-
-    auth.onAuthStateChanged(async user=>{
-      if(!user){
-        currentUser=null;
-        userRole=null;
-        families=[];
-        branches=[];
-        servants=[];
-        if(unsubscribeFamilies) unsubscribeFamilies();
-        if(unsubscribeBranches) unsubscribeBranches();
-        if(unsubscribeServants) unsubscribeServants();
-        showLogin();
-        return;
-      }
-
-      try{
-        const doc=await db.collection('users').doc(user.uid).get();
-        if(!doc.exists || !['admin','viewer'].includes(doc.data().role)){
-          await auth.signOut();
-          $('loginError').textContent='هذا الحساب غير مضاف إلى مستخدمي الخدمة.';
-          return;
-        }
-
-        currentUser=user;
-        userRole=doc.data().role;
-        $('who').textContent=(doc.data().displayName||user.email)+' — '+
-          (userRole==='admin'?'مدير النظام':'مشاهدة فقط');
-        showApp();
-        setPermissions();
-        listenBranches();
-        listenServants();
-        listenFamilies();
-      }catch(e){
-        $('loginError').textContent='تعذر التحقق من الصلاحيات: '+e.message;
-        await auth.signOut();
-      }
-    });
-  }catch(e){
-    $('loginError').textContent='خطأ في إعداد Firebase: '+e.message;
-  }
-}
-
-$('loginBtn').onclick=async()=>{
-  $('loginError').textContent='';
-  try{
-    await auth.signInWithEmailAndPassword($('email').value.trim(),$('password').value);
-  }catch(e){
-    $('loginError').textContent='تعذر تسجيل الدخول. راجعي البريد وكلمة المرور.';
-  }
-};
-
-$('logoutBtn').onclick=()=>auth.signOut();
-
-function setPermissions(){
-  const admin=userRole==='admin';
-  $('addBtn').classList.toggle('hidden',!admin);
-  $('familyForm').classList.toggle('hidden',!admin);
-  $('branchAdminPanel').classList.toggle('hidden',!admin);
-}
-
-function listenBranches(){
-  if(unsubscribeBranches) unsubscribeBranches();
-  unsubscribeBranches=db.collection('branches').orderBy('name').onSnapshot(s=>{
-    branches=s.docs.map(d=>({id:d.id,...d.data()}));
-    renderBranchOptions();
-    renderBranchAdmin();
-    render();
-  },e=>{
-    $('branchError').textContent='تعذر تحميل الفروع: '+e.message;
-  });
-}
-
-function listenServants(){
-  if(unsubscribeServants) unsubscribeServants();
-  unsubscribeServants=db.collection('servants').orderBy('name').onSnapshot(s=>{
-    servants=s.docs.map(d=>({id:d.id,...d.data()}));
-    renderServantOptions();
-    renderBranchAdmin();
-    render();
-  },e=>{
-    $('branchError').textContent='تعذر تحميل الخدام: '+e.message;
-  });
-}
-
-function listenFamilies(){
-  if(unsubscribeFamilies) unsubscribeFamilies();
-  unsubscribeFamilies=db.collection('families').orderBy('familyName').onSnapshot(async s=>{
-    try{
-      const rows=await Promise.all(s.docs.map(async d=>{
-        const data=d.data();
-        const ms=await d.ref.collection('members').get();
-        return {
-          id:d.id,
-          ...data,
-          branchId:data.branchId||'',
-          branchName:data.branchName||'',
-          members:ms.docs.map(m=>({
-            id:m.id,
-            ...m.data(),
-            education:m.data().education||m.data().educatin||''
-          }))
-        };
-      }));
-      families=rows;
-      render();
-    }catch(e){
-      $('familyList').textContent='تعذر تحميل بيانات الأفراد: '+e.message;
+  auth.onAuthStateChanged(async user=>{
+   clearListeners();
+   if(!user){
+    currentUser=null;userRole=null;
+    showLogin();return;
+   }
+   try{
+    const u=await db.collection("users").doc(user.uid).get();
+    if(!u.exists||!["admin","viewer","staff"].includes(u.data().role)){
+     await auth.signOut();
+     msg("loginError","هذا الحساب غير معتمد في نظام الخدمة.");
+     return;
     }
-  },e=>{
-    $('familyList').textContent='تعذر تحميل الأسر: '+e.message;
+    currentUser=user;userRole=u.data().role;
+    const roleName={admin:"مدير النظام",viewer:"مشاهدة فقط",staff:"حساب الخدام"}[userRole];
+    $("who").textContent=(u.data().displayName||user.email)+" — "+roleName;
+    showApp();setPermissions();startListeners();
+    setDefaultDates();
+   }catch(e){
+    msg("loginError","تعذر التحقق من الصلاحيات: "+e.message);
+    await auth.signOut();
+   }
   });
+ }catch(e){msg("loginError","خطأ في إعداد Firebase: "+e.message)}
+}
+function clearListeners(){
+ unsubscribers.forEach(fn=>{try{fn()}catch(e){}});
+ unsubscribers=[];
+}
+function listen(query,callback,errorCallback){
+ const unsub=query.onSnapshot(callback,errorCallback);
+ unsubscribers.push(unsub);
+}
+function startListeners(){
+ listen(db.collection("branches").orderBy("name"),s=>{
+  branches=s.docs.map(d=>({id:d.id,...d.data()}));
+  renderBranchOptions();renderBranches();render();
+ },e=>msg("branchError","تعذر تحميل الفروع: "+e.message));
+
+ listen(db.collection("servants").orderBy("name"),s=>{
+  servants=s.docs.map(d=>({id:d.id,...d.data()}));
+  renderServantOptions();renderBranches();render();
+ },e=>msg("branchError","تعذر تحميل الخدام: "+e.message));
+
+ listen(db.collection("families").orderBy("familyName"),async s=>{
+  try{
+   const rows=await Promise.all(s.docs.map(async d=>{
+    const data=d.data();
+    const members=await d.ref.collection("members").get();
+    return {
+     id:d.id,...data,
+     branchId:data.branchId||"",
+     branchName:data.branchName||"",
+     members:members.docs.map(m=>({
+      id:m.id,...m.data(),
+      education:m.data().education||m.data().educatin||""
+     }))
+    };
+   }));
+   families=rows;render();renderBranches();
+  }catch(e){$("familyList").textContent="تعذر تحميل أفراد الأسر: "+e.message}
+  },e=>$("familyList").textContent="تعذر تحميل الأسر: "+e.message);
+
+ listen(db.collection("specialBeneficiaries").orderBy("name"),s=>{
+  beneficiaries=s.docs.map(d=>({id:d.id,...d.data()}));
+  renderBeneficiaries();fillRecipientOptions();renderBlessings();renderHandovers();
+ },e=>{$("beneficiaryList").textContent="تعذر تحميل المستفيدين: "+e.message});
+
+ listen(db.collection("specialAidRecords").orderBy("date","desc"),s=>{
+  aidRecords=s.docs.map(d=>({id:d.id,...d.data()}));
+  renderBeneficiaryHistory();
+ },e=>msg("aidError","تعذر تحميل سجل المساعدات: "+e.message));
+
+ listen(db.collection("monthlyBlessings").orderBy("month","desc"),s=>{
+  blessings=s.docs.map(d=>({id:d.id,...d.data()}));
+  renderBlessings();
+ },e=>msg("blessingError","تعذر تحميل البركة الشهرية: "+e.message));
+
+ listen(db.collection("dailyHandovers").orderBy("date","desc"),s=>{
+  handovers=s.docs.map(d=>({id:d.id,...d.data()}));
+  renderHandovers();
+ },e=>msg("handoverError","تعذر تحميل التسليمات: "+e.message));
+}
+$("loginBtn").onclick=async()=>{
+ msg("loginError","");
+ try{
+  await auth.signInWithEmailAndPassword($("email").value.trim(),$("password").value);
+ }catch(e){msg("loginError","تعذر تسجيل الدخول. راجعي البريد الإلكتروني وكلمة المرور.")}
+};
+$("logoutBtn").onclick=()=>auth.signOut();
+
+document.querySelectorAll(".tab").forEach(btn=>{
+ btn.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+  btn.classList.add("active");$(btn.dataset.page).classList.add("active");
+ };
+});
+
+function setDefaultDates(){
+ const t=today();
+ ["aidDate","handoverDate","blessingDate"].forEach(id=>{if($(id))$(id).value=t});
+ const month=t.slice(0,7);
+ ["blessingMonth","blessingMonthForm"].forEach(id=>{if($(id))$(id).value=month});
 }
 
 function renderBranchOptions(){
-  const filter=$('branchFilter');
-  const familySelect=$('familyBranch');
-  const oldFilter=filter.value||selectedBranch;
-  const oldFamily=familySelect.value;
-
-  filter.innerHTML='<option value="all">كل الفروع</option>'+
-    branches.map(b=>`<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('')+
-    '<option value="__none">أسر بدون فرع (قديمة)</option>';
-
-  filter.value=(oldFilter==='all'||oldFilter==='__none'||branches.some(b=>b.id===oldFilter))?oldFilter:'all';
-  selectedBranch=filter.value;
-
-  familySelect.innerHTML='<option value="">اختاري الفرع</option>'+
-    branches.map(b=>`<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('');
-
-  if(oldFamily && branches.some(b=>b.id===oldFamily)) familySelect.value=oldFamily;
-  renderServantOptions();
+ const filter=$("branchFilter"),familySelect=$("familyBranch");
+ const old=filter.value||selectedBranch;
+ filter.innerHTML='<option value="all">كل الفروع</option>'+
+  branches.map(b=>`<option value="${esc(b.id)}">${esc(b.name)}</option>`).join("")+
+  '<option value="__none">أسر بدون فرع</option>';
+ filter.value=(old==="all"||old==="__none"||branches.some(b=>b.id===old))?old:"all";
+ selectedBranch=filter.value;
+ familySelect.innerHTML='<option value="">اختاري الفرع</option>'+
+  branches.map(b=>`<option value="${esc(b.id)}">${esc(b.name)}</option>`).join("");
+ renderServantOptions();
 }
-
-function renderServantOptions(selectedIds=[]){
-  const branchId=$('familyBranch').value;
-  const allowed=servants.filter(x=>x.branchId===branchId);
-
-  $('familyServants').innerHTML=allowed.map(x=>
-    `<option value="${esc(x.id)}" ${selectedIds.includes(x.id)?'selected':''}>${esc(x.name)}</option>`
-  ).join('');
-
-  if(!branchId) $('familyServants').innerHTML='<option disabled>اختاري الفرع أولًا</option>';
-  else if(!allowed.length) $('familyServants').innerHTML='<option disabled>لا يوجد خدام مسجلون لهذا الفرع</option>';
+function renderServantOptions(selected=[]){
+ const branchId=$("familyBranch").value;
+ const list=servants.filter(s=>s.branchId===branchId);
+ $("familyServants").innerHTML=list.map(s=>
+  `<option value="${esc(s.id)}" ${selected.includes(s.id)?"selected":""}>${esc(s.name)}</option>`
+ ).join("");
+ if(!branchId)$("familyServants").innerHTML='<option disabled>اختاري الفرع أولًا</option>';
+ else if(!list.length)$("familyServants").innerHTML='<option disabled>لا يوجد خدام مسجلون لهذا الفرع</option>';
 }
+$("familyBranch").onchange=()=>renderServantOptions();
 
-$('familyBranch').addEventListener('change',()=>renderServantOptions());
-
-function renderBranchAdmin(){
-  if(userRole!=='admin') return;
-
-  $('branchList').innerHTML=branches.length?branches.map(b=>{
-    const list=servants.filter(x=>x.branchId===b.id);
-    return `
-      <div class="branch-item" style="display:block">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-          <strong>${esc(b.name)}</strong>
-          <div class="branch-tools">
-            <button type="button" class="btn light" onclick="renameBranch('${b.id}')">تعديل اسم الفرع</button>
-          </div>
-        </div>
-        <div class="servant-list"><b>الخدام (${displayNumber(list.length)}):</b> ${list.length?list.map(x=>`<span class="pill">${esc(x.name)} <button type="button" onclick="renameServant('${x.id}')" title="تعديل" style="border:0;background:none;color:#142b4a;padding:0 2px">✎</button></span>`).join(''):'لم تتم إضافة خدام لهذا الفرع بعد.'}</div>
-        <div class="servant-add">
-          <input id="servantName-${b.id}" placeholder="اسم الخادم الجديد">
-          <button type="button" class="btn" onclick="addServant('${b.id}')">+ إضافة خادم</button>
-        </div>
-      </div>`;
-  }).join(''):'<div class="empty">لم تتم إضافة فروع بعد.</div>';
-
-  renderBranchServantStats();
+function visibleFamilies(){
+ if(selectedBranch==="all")return families;
+ if(selectedBranch==="__none")return families.filter(f=>!f.branchId);
+ return families.filter(f=>f.branchId===selectedBranch);
 }
-
-$('addBranchBtn').onclick=async()=>{
-  if(userRole!=='admin') return;
-  const name=$('newBranchName').value.trim();
-  $('branchError').textContent='';
-
-  if(!name){
-    $('branchError').textContent='اكتبي اسم الفرع أولًا.';
-    return;
-  }
-
-  if(branches.some(b=>b.name.trim().toLowerCase()===name.toLowerCase())){
-    $('branchError').textContent='اسم الفرع موجود بالفعل.';
-    return;
-  }
-
-  try{
-    await db.collection('branches').add({
-      name,
-      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
-      createdBy:currentUser.uid
-    });
-    $('newBranchName').value='';
-    $('branchError').style.color='#167647';
-    $('branchError').textContent='تمت إضافة الفرع بنجاح.';
-  }catch(e){
-    $('branchError').style.color='#b42318';
-    $('branchError').textContent='تعذرت إضافة الفرع: '+e.message;
-  }
-};
-
-window.renameBranch=async id=>{
-  if(userRole!=='admin') return;
-  const branch=branches.find(b=>b.id===id);
-  if(!branch) return;
-
-  const name=prompt('اكتبي الاسم الجديد للفرع:',branch.name);
-  if(name===null) return;
-
-  const clean=name.trim();
-  if(!clean){alert('اسم الفرع لا يمكن أن يكون فارغًا.');return;}
-
-  if(branches.some(b=>b.id!==id && b.name.trim().toLowerCase()===clean.toLowerCase())){
-    alert('اسم الفرع موجود بالفعل.');
-    return;
-  }
-
-  try{
-    await db.collection('branches').doc(id).update({
-      name:clean,
-      updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    const batch=db.batch();
-    families.filter(f=>f.branchId===id).forEach(f=>{
-      batch.update(db.collection('families').doc(f.id),{branchName:clean});
-    });
-    if(families.some(f=>f.branchId===id)) await batch.commit();
-  }catch(e){
-    alert('تعذر تعديل اسم الفرع: '+e.message);
-  }
-};
-
-window.addServant=async branchId=>{
-  if(userRole!=='admin') return;
-  const input=$(`servantName-${branchId}`);
-  const name=input.value.trim();
-
-  if(!name){alert('اكتبي اسم الخادم أولًا.');return;}
-
-  if(servants.some(x=>x.branchId===branchId && x.name.trim().toLowerCase()===name.toLowerCase())){
-    alert('اسم الخادم موجود بالفعل في هذا الفرع.');
-    return;
-  }
-
-  try{
-    await db.collection('servants').add({
-      name,branchId,
-      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
-      createdBy:currentUser.uid
-    });
-    input.value='';
-  }catch(e){
-    alert('تعذرت إضافة الخادم: '+e.message);
-  }
-};
-
-window.renameServant=async id=>{
-  if(userRole!=='admin') return;
-  const servant=servants.find(x=>x.id===id);
-  if(!servant) return;
-
-  const name=prompt('اكتبي الاسم الجديد للخادم:',servant.name);
-  if(name===null) return;
-
-  const clean=name.trim();
-  if(!clean){alert('اسم الخادم لا يمكن أن يكون فارغًا.');return;}
-
-  try{
-    await db.collection('servants').doc(id).update({
-      name:clean,
-      updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    const batch=db.batch();
-    families.filter(f=>(f.servantIds||[]).includes(id)).forEach(f=>{
-      const ids=f.servantIds||[];
-      const names=ids.map(sid=>sid===id?clean:(servants.find(x=>x.id===sid)?.name||''));
-      batch.update(db.collection('families').doc(f.id),{servantNames:names});
-    });
-    if(families.some(f=>(f.servantIds||[]).includes(id))) await batch.commit();
-  }catch(e){
-    alert('تعذر تعديل اسم الخادم: '+e.message);
-  }
-};
-
-function renderBranchServantStats(){
-  const host=$('branchServantStats');
-  if(!host) return;
-
-  host.innerHTML=branches.length?branches.map(b=>{
-    const branchFamilies=families.filter(f=>f.branchId===b.id);
-    const branchServants=servants.filter(x=>x.branchId===b.id);
-
-    return `<div class="branch-item" style="display:block;background:white">
-      <b>${esc(b.name)}</b>
-      <div class="stat-grid-extra">
-        <div class="small-stat">عدد الأسر<b>${displayNumber(branchFamilies.length)}</b></div>
-        <div class="small-stat">عدد الخدام<b>${displayNumber(branchServants.length)}</b></div>
-      </div>
-      ${branchServants.map(x=>{
-        const count=branchFamilies.filter(f=>(f.servantIds||[]).includes(x.id)).length;
-        return `<div class="meta" style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:5px 0"><span>${esc(x.name)}</span><b>${displayNumber(count)} أسرة</b></div>`;
-      }).join('')}
-    </div>`;
-  }).join(''):'<div class="empty">أضيفي الفروع لعرض الإحصائيات.</div>';
-}
-
-$('branchFilter').onchange=()=>{
-  selectedBranch=$('branchFilter').value;
-  render();
-};
-
-function getVisibleFamilies(){
-  if(selectedBranch==='all') return families;
-  if(selectedBranch==='__none') return families.filter(f=>!f.branchId);
-  return families.filter(f=>f.branchId===selectedBranch);
-}
-
-function displayNumber(value){
-  return toEnglishDigits(String(value));
-}
+$("branchFilter").onchange=()=>{selectedBranch=$("branchFilter").value;render()};
+$("search").oninput=render;
 
 function render(){
-  const q=$('search').value.trim().toLowerCase();
-  const visible=getVisibleFamilies();
-
-  const filtered=visible.filter(f=>
-    (f.familyName||'').toLowerCase().includes(q) || (f.phone||'').includes(q)
-  );
-
-  let members=0,income=0;
-  const counts=Object.fromEntries(stages.map(s=>[s,0]));
-
-  visible.forEach(f=>{
-    income+=Number(f.monthlyIncome||0);
-    (f.members||[]).forEach(m=>{
-      members++;
-      if(counts[m.education]!==undefined) counts[m.education]++;
-    });
+ const visible=visibleFamilies();
+ const q=$("search").value.trim().toLowerCase();
+ const filtered=visible.filter(f=>
+  (f.familyName||"").toLowerCase().includes(q)||(f.phone||"").includes(q)
+ );
+ let memberCount=0,income=0;
+ const edu=Object.fromEntries(stages.map(s=>[s,0]));
+ visible.forEach(f=>{
+  income+=Number(f.monthlyIncome||0);
+  (f.members||[]).forEach(m=>{
+   memberCount++;
+   if(edu[m.education]!==undefined)edu[m.education]++;
   });
-
-  $('familiesCount').textContent=displayNumber(visible.length);
-  $('membersCount').textContent=displayNumber(members);
-  $('bridesCount').textContent=displayNumber(visible.reduce((n,f)=>n+Number(f.bridesCount||0),0));
-  $('incomeTotal').textContent=displayNumber(income);
-  $('branchesCount').textContent=displayNumber(branches.length);
-  $('servantsCount').textContent=displayNumber(servants.length);
-
-  renderBranchServantStats();
-
-  const branchLabel=selectedBranch==='all'?'كل الفروع':
-    selectedBranch==='__none'?'أسر بدون فرع':
-    (branches.find(b=>b.id===selectedBranch)?.name||'فرع');
-
-  $('branchSummary').textContent='الإحصائيات المعروضة: '+branchLabel;
-
-  $('educationStats').innerHTML=stages.map(s=>
-    `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #e5eaf0;padding:7px 0"><span>${s}</span><b>${displayNumber(counts[s])}</b></div>`
-  ).join('');
-
-  $('familyList').innerHTML=filtered.length?filtered.map(f=>{
-    const branch=branches.find(b=>b.id===f.branchId);
-    const branchLabel=branch?.name||f.branchName||'غير محدد';
-
-    // تكوين العنوان من الحقول الموجودة فقط
-    const addressParts=[];
-    if(f.propertyNumber) addressParts.push('عقار رقم '+esc(f.propertyNumber));
-    if(f.streetName) addressParts.push('شارع '+esc(f.streetName));
-    if(f.floor) addressParts.push('الدور '+esc(f.floor));
-    const addressText=addressParts.join('، ');
-
-    return `
-      <article class="family">
-        <div class="family-head">
-          <div>
-            <h3>${esc(f.familyName||'أسرة بدون اسم')}</h3>
-            <div class="meta">
-              الفرع: <b>${esc(branchLabel)}</b> ·
-              ${esc(f.phone||'لا يوجد هاتف')} ·
-              ${esc(f.housing||'السكن غير محدد')} ·
-              دخل ${displayNumber(Number(f.monthlyIncome||0))}
-            </div>
-
-            ${addressText?`<div class="meta"><b>العنوان:</b> ${addressText}</div>`:''}
-
-            <div class="meta"><b>الخدام المسؤولون:</b> ${((f.servantNames||[]).length?(f.servantNames||[]).map(n=>`<span class="pill">${esc(n)}</span>`).join(''):'لم يتم تحديد خدام')}</div>
-          </div>
-
-          <span class="pill">${displayNumber((f.members||[]).length)} أفراد</span>
-        </div>
-
-        <div class="members">
-          ${(f.members||[]).map(m=>`
-            <div class="member">
-              ${esc(m.name||'اسم غير مسجل')} — ${m.age!==null && m.age!==undefined && m.age!==''?esc(displayNumber(m.age))+' سنة':'السن غير محدد'} — ${esc(m.education||'المرحلة غير محددة')}
-            </div>
-          `).join('')||'<div class="meta">لا يوجد أفراد مسجلون</div>'}
-        </div>
-
-        ${f.needs?`<div class="note"><b>الاحتياجات:</b> ${esc(f.needs)}</div>`:''}
-        ${f.notes?`<div class="meta">ملاحظات: ${esc(f.notes)}</div>`:''}
-
-        ${userRole==='admin'?`
-          <div class="actions">
-            <button class="btn light" onclick="editFamily('${f.id}')">تعديل</button>
-            <button class="btn danger" onclick="deleteFamily('${f.id}')">حذف</button>
-          </div>`:''}
-      </article>`;
-  }).join(''):'<div class="empty">لا توجد أسر مطابقة للبحث.</div>';
+ });
+ $("familiesCount").textContent=num(visible.length);
+ $("membersCount").textContent=num(memberCount);
+ $("bridesCount").textContent=num(visible.reduce((n,f)=>n+Number(f.bridesCount||0),0));
+ $("incomeTotal").textContent=num(income);
+ $("branchesCount").textContent=num(branches.length);
+ $("servantsCount").textContent=num(servants.length);
+ const branchName=selectedBranch==="all"?"كل الفروع":
+  selectedBranch==="__none"?"أسر بدون فرع":
+  branches.find(b=>b.id===selectedBranch)?.name||"فرع";
+ $("branchSummary").textContent="الإحصائيات المعروضة: "+branchName;
+ $("educationStats").innerHTML=stages.map(s=>
+  `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #e5eaf0;padding:7px 0"><span>${s}</span><b>${num(edu[s])}</b></div>`
+ ).join("");
+ $("familyList").innerHTML=filtered.length?filtered.map(renderFamily).join(""):'<div class="empty">لا توجد أسر مطابقة.</div>';
 }
-
+function renderFamily(f){
+ const branch=branches.find(b=>b.id===f.branchId);
+ const branchName=branch?.name||f.branchName||"غير محدد";
+ const address=[f.propertyNumber&&"عقار "+esc(f.propertyNumber),f.streetName&&"شارع "+esc(f.streetName),f.floor&&"الدور "+esc(f.floor)].filter(Boolean).join("، ");
+ return `<article class="family">
+  <div class="family-head"><div>
+   <h3>${esc(f.familyName||"أسرة بدون اسم")}</h3>
+   <div class="meta">الفرع: ${esc(branchName)} · ${esc(f.phone||"لا يوجد هاتف")} · ${esc(f.housing||"السكن غير محدد")} · الدخل ${num(f.monthlyIncome)}</div>
+   ${address?`<div class="meta">العنوان: ${address}</div>`:""}
+   <div class="meta">الخدام: ${(f.servantNames||[]).map(n=>`<span class="pill">${esc(n)}</span>`).join("")||"غير محدد"}</div>
+  </div><span class="pill">${num((f.members||[]).length)} أفراد</span></div>
+  <div class="members">${(f.members||[]).map(m=>`<div class="member">${esc(m.name||"اسم غير مسجل")} — ${m.age!==null&&m.age!==undefined?esc(m.age)+" سنة":"السن غير محدد"} — ${esc(m.education||"المرحلة غير محددة")}</div>`).join("")||'<div class="meta">لا يوجد أفراد مسجلون</div>'}</div>
+  ${f.needs?`<div class="note">الاحتياجات: ${esc(f.needs)}</div>`:""}
+  ${f.notes?`<div class="meta">ملاحظات: ${esc(f.notes)}</div>`:""}
+  ${isAdmin()?`<div class="actions"><button class="btn light" onclick="editFamily('${f.id}')">تعديل</button><button class="btn danger" onclick="deleteFamily('${f.id}')">حذف</button></div>`:""}
+ </article>`;
+}
 function addMemberRow(m={}){
-  const div=document.createElement('div');
-  div.className='row member-row';
-  div.style.marginBottom='8px';
-
-  div.innerHTML=`
-    <div>
-      <label>اسم الفرد</label>
-      <input class="m-name" value="${esc(m.name||'')}" placeholder="اسم الفرد (اختياري)">
-    </div>
-    <div>
-      <label>السن والمرحلة</label>
-      <div style="display:flex;gap:5px">
-        <input class="m-age" type="number" min="0" placeholder="السن (اختياري)" value="${esc(m.age??'')}" style="width:75px">
-        <select class="m-edu">
-          <option value="">المرحلة التعليمية (اختياري)</option>
-          ${stages.map(s=>`<option value="${s}" ${m.education===s?'selected':''}>${s}</option>`).join('')}
-        </select>
-        <button type="button" class="btn danger remove-member">×</button>
-      </div>
-    </div>`;
-
-  div.querySelector('.remove-member').onclick=()=>div.remove();
-  $('memberInputs').append(div);
+ const div=document.createElement("div");
+ div.className="row member-row";div.style.marginBottom="8px";
+ div.innerHTML=`<div><label>اسم الفرد</label><input class="m-name" value="${esc(m.name||"")}" placeholder="اختياري"></div>
+ <div><label>السن والمرحلة</label><div style="display:flex;gap:5px">
+ <input class="m-age" type="number" min="0" placeholder="السن" value="${esc(m.age??"")}" style="width:75px">
+ <select class="m-edu"><option value="">المرحلة (اختياري)</option>${stages.map(s=>`<option ${m.education===s?"selected":""}>${s}</option>`).join("")}</select>
+ <button type="button" class="btn danger remove-member">×</button></div></div>`;
+ div.querySelector(".remove-member").onclick=()=>div.remove();
+ $("memberInputs").append(div);
 }
-
-$('addMember').onclick=()=>addMemberRow();
-
-function resetForm(){
-  $('familyForm').reset();
-  $('familyId').value='';
-  $('memberInputs').innerHTML='';
-  $('familyServants').innerHTML='';
-  $('propertyNumber').value='';
-  $('streetName').value='';
-  $('floor').value='';
-  $('formTitle').textContent='بيانات الأسرة';
-  $('formError').textContent='';
-  $('formError').style.color='#b42318';
+$("addMember").onclick=()=>addMemberRow();
+function resetFamilyForm(){
+ $("familyForm").reset();$("familyId").value="";$("memberInputs").innerHTML="";
+ $("formTitle").textContent="بيانات الأسرة";msg("formError","");
+ renderServantOptions();
 }
-
-$('addBtn').onclick=()=>{
-  resetForm();
-  $('familyName').focus();
-};
-
-$('cancelBtn').onclick=resetForm;
-$('search').oninput=render;
-
+$("addBtn").onclick=()=>{resetFamilyForm();$("familyName").focus()};
+$("cancelBtn").onclick=resetFamilyForm;
 window.editFamily=id=>{
-  const f=families.find(x=>x.id===id);
-  if(!f)return;
-
-  resetForm();
-  $('familyId').value=id;
-  $('familyName').value=f.familyName||'';
-  $('familyBranch').value=f.branchId||'';
-  renderServantOptions(f.servantIds||[]);
-  $('phone').value=f.phone||'';
-  $('propertyNumber').value=f.propertyNumber||'';
-  $('streetName').value=f.streetName||'';
-  $('floor').value=f.floor||'';
-  $('income').value=f.monthlyIncome||'';
-  $('housing').value=f.housing||'';
-  $('needs').value=f.needs||'';
-  $('notes').value=f.notes||'';
-  $('memberInputs').innerHTML='';
-  (f.members||[]).forEach(addMemberRow);
-  $('formTitle').textContent='تعديل بيانات الأسرة';
-  window.scrollTo({top:0,behavior:'smooth'});
+ const f=families.find(x=>x.id===id);if(!f)return;
+ resetFamilyForm();$("familyId").value=id;
+ $("familyName").value=f.familyName||"";
+ $("familyBranch").value=f.branchId||"";
+ renderServantOptions(f.servantIds||[]);
+ ["phone","propertyNumber","streetName","floor","housing","needs","notes"].forEach(k=>{
+  const idMap={phone:"phone",propertyNumber:"propertyNumber",streetName:"streetName",floor:"floor",housing:"housing",needs:"needs",notes:"notes"};
+  $(idMap[k]).value=f[k]||"";
+ });
+ $("income").value=f.monthlyIncome||0;
+ (f.members||[]).forEach(addMemberRow);
+ $("formTitle").textContent="تعديل بيانات الأسرة";
+ window.scrollTo({top:0,behavior:"smooth"});
 };
-
 window.deleteFamily=async id=>{
-  if(!confirm('هل أنتِ متأكدة من حذف الأسرة؟'))return;
-
-  try{
-    const ref=db.collection('families').doc(id);
-    const ms=await ref.collection('members').get();
-    const batch=db.batch();
-
-    ms.docs.forEach(d=>batch.delete(d.ref));
-    batch.delete(ref);
-    await batch.commit();
-  }catch(e){
-    alert('تعذر الحذف: '+e.message);
+ if(!isAdmin()||!confirm("هل أنتِ متأكدة من حذف الأسرة؟"))return;
+ try{
+  const ref=db.collection("families").doc(id);
+  const ms=await ref.collection("members").get();
+  const batch=db.batch();ms.docs.forEach(d=>batch.delete(d.ref));
+  batch.delete(ref);await batch.commit();
+ }catch(e){alert("تعذر حذف الأسرة: "+e.message)}
+};
+$("familyForm").onsubmit=async e=>{
+ e.preventDefault();if(!isAdmin())return;
+ const name=$("familyName").value.trim();
+ if(!name){msg("formError","اسم الأسرة مطلوب.");return}
+ const members=[...document.querySelectorAll(".member-row")].map(r=>({
+  name:r.querySelector(".m-name").value.trim(),
+  age:r.querySelector(".m-age").value===""?null:Number(r.querySelector(".m-age").value),
+  education:r.querySelector(".m-edu").value
+ })).filter(m=>m.name||m.age!==null||m.education);
+ const branchId=$("familyBranch").value;
+ const branch=branches.find(b=>b.id===branchId);
+ const servantIds=[...$("familyServants").selectedOptions].map(o=>o.value).filter(Boolean);
+ const servantNames=servantIds.map(id=>servants.find(s=>s.id===id)?.name||"");
+ const data={
+  familyName:name,branchId,branchName:branch?.name||"",
+  servantIds,servantNames,phone:$("phone").value.trim(),
+  propertyNumber:$("propertyNumber").value.trim(),
+  streetName:$("streetName").value.trim(),floor:$("floor").value.trim(),
+  monthlyIncome:Number($("income").value||0),housing:$("housing").value,
+  needs:$("needs").value.trim(),notes:$("notes").value.trim(),
+  updatedAt:serverTime()
+ };
+ $("saveBtn").disabled=true;msg("formError","جارٍ الحفظ...");
+ try{
+  let ref;
+  if($("familyId").value){
+   ref=db.collection("families").doc($("familyId").value);
+   await ref.update(data);
+  }else{
+   data.createdAt=serverTime();data.bridesCount=0;
+   ref=await db.collection("families").add(data);
   }
+  const old=await ref.collection("members").get();
+  const batch=db.batch();old.docs.forEach(d=>batch.delete(d.ref));
+  members.forEach(m=>batch.set(ref.collection("members").doc(),m));
+  if(old.size||members.length)await batch.commit();
+  resetFamilyForm();msg("formError","تم حفظ الأسرة بنجاح.",true);
+ }catch(err){msg("formError","تعذر الحفظ: "+err.message)}
+ finally{$("saveBtn").disabled=false}
 };
 
-/* حفظ الأسرة: العنوان اختياري، والأفراد اختياريون */
-$('familyForm').onsubmit=async e=>{
-  e.preventDefault();
-  if(userRole!=='admin')return;
+/* =========================
+   المستفيدون والمساعدات الخاصة
+========================= */
 
-  const familyName=$('familyName').value.trim();
+function renderBeneficiaries(){
+ const q=$("beneficiarySearch").value.trim().toLowerCase();
+ const list=beneficiaries.filter(b=>
+  (b.name||"").toLowerCase().includes(q)||(b.phone||"").includes(q)
+ );
+ $("beneficiaryList").innerHTML=list.length?list.map(b=>`
+  <article class="record">
+   <div class="family-head">
+    <div><b>${esc(b.name)}</b>
+     <div class="meta">${esc(b.phone||"لا يوجد هاتف")} · ${esc(b.address||"لا يوجد عنوان")}</div>
+    </div>
+    <span class="pill">${num(aidRecords.filter(a=>a.beneficiaryId===b.id).length)} مساعدات</span>
+   </div>
+   ${b.reason?`<div class="note">${esc(b.reason)}</div>`:""}
+   ${b.notes?`<div class="meta">ملاحظات: ${esc(b.notes)}</div>`:""}
+   <div class="actions">
+    <button class="btn light" onclick="showBeneficiaryHistory('${b.id}')">سجل المساعدات</button>
+    ${canEditService()?`<button class="btn light" onclick="editBeneficiary('${b.id}')">تعديل</button>`:""}
+    ${isAdmin()?`<button class="btn danger" onclick="deleteBeneficiary('${b.id}')">حذف</button>`:""}
+   </div>
+  </article>
+ `).join(""):'<div class="empty">لا يوجد مستفيدون مسجلون.</div>';
+}
+$("beneficiarySearch").oninput=renderBeneficiaries;
 
-  if(!familyName){
-    $('formError').textContent='من فضلك اكتبي اسم الأسرة.';
-    $('familyName').focus();
-    return;
+function resetBeneficiaryForm(){
+ $("beneficiaryForm").reset();$("beneficiaryId").value="";
+ $("beneficiaryFormTitle").textContent="بيانات المستفيد";
+ msg("beneficiaryError","");
+}
+$("addBeneficiaryBtn").onclick=()=>{
+ if(!canEditService())return;
+ resetBeneficiaryForm();$("beneficiaryName").focus();
+};
+$("cancelBeneficiaryBtn").onclick=resetBeneficiaryForm;
+
+$("beneficiaryForm").onsubmit=async e=>{
+ e.preventDefault();if(!canEditService())return;
+ const name=$("beneficiaryName").value.trim();
+ if(!name){msg("beneficiaryError","اسم المستفيد مطلوب.");return}
+ const data={
+  name,phone:$("beneficiaryPhone").value.trim(),
+  address:$("beneficiaryAddress").value.trim(),
+  reason:$("beneficiaryReason").value.trim(),
+  notes:$("beneficiaryNotes").value.trim(),
+  updatedAt:serverTime()
+ };
+ $("saveBeneficiaryBtn").disabled=true;
+ try{
+  const id=$("beneficiaryId").value;
+  if(id)await db.collection("specialBeneficiaries").doc(id).update(data);
+  else{
+   data.createdAt=serverTime();
+   await db.collection("specialBeneficiaries").add(data);
   }
-
-  // لا توجد شروط إلزامية لرقم العقار أو الشارع أو الدور
-
-  const members=[...document.querySelectorAll('.member-row')].map(r=>({
-    name:r.querySelector('.m-name').value.trim(),
-    age:r.querySelector('.m-age').value===''?null:Number(r.querySelector('.m-age').value),
-    education:r.querySelector('.m-edu').value
-  })).filter(m=>m.name || m.age!==null || m.education);
-
-  const branchId=$('familyBranch').value;
-  const selected=branches.find(b=>b.id===branchId);
-  const servantIds=[...$('familyServants').selectedOptions].map(o=>o.value).filter(Boolean);
-  const servantNames=servantIds.map(id=>servants.find(x=>x.id===id)?.name).filter(Boolean);
-
-  const data={
-    familyName,
-    branchId:branchId||'',
-    branchName:selected?.name||'',
-    servantIds,
-    servantNames,
-    phone:$('phone').value.trim(),
-    propertyNumber:$('propertyNumber').value.trim(),
-    streetName:$('streetName').value.trim(),
-    floor:$('floor').value.trim(),
-    monthlyIncome:Number($('income').value||0),
-    housing:$('housing').value,
-    needs:$('needs').value.trim(),
-    notes:$('notes').value.trim(),
-    updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-  };
-
-  $('formError').style.color='#b42318';
-  $('formError').textContent='جارٍ حفظ بيانات الأسرة...';
-  $('saveBtn').disabled=true;
-
-  try{
-    const id=$('familyId').value;
-    let ref;
-
-    if(id){
-      ref=db.collection('families').doc(id);
-      await ref.update(data);
-    }else{
-      data.createdAt=firebase.firestore.FieldValue.serverTimestamp();
-      data.bridesCount=0;
-      ref=await db.collection('families').add(data);
-    }
-
-    const old=await ref.collection('members').get();
-    const batch=db.batch();
-
-    old.docs.forEach(d=>batch.delete(d.ref));
-
-    members.forEach(m=>{
-      batch.set(ref.collection('members').doc(),m);
-    });
-
-    if(old.size || members.length){
-      await batch.commit();
-    }
-
-    resetForm();
-    $('formError').style.color='#167647';
-    $('formError').textContent='تم حفظ الأسرة بنجاح.';
-  }catch(err){
-    $('formError').style.color='#b42318';
-    $('formError').textContent='تعذر الحفظ: '+err.message;
-  }finally{
-    $('saveBtn').disabled=false;
-  }
+  resetBeneficiaryForm();
+  msg("beneficiaryError","تم حفظ بيانات المستفيد.",true);
+ }catch(e){msg("beneficiaryError","تعذر الحفظ: "+e.message)}
+ finally{$("saveBeneficiaryBtn").disabled=false}
 };
 
+window.editBeneficiary=id=>{
+ if(!canEditService())return;
+ const b=beneficiaries.find(x=>x.id===id);if(!b)return;
+ resetBeneficiaryForm();$("beneficiaryId").value=id;
+ $("beneficiaryName").value=b.name||"";
+ $("beneficiaryPhone").value=b.phone||"";
+ $("beneficiaryAddress").value=b.address||"";
+ $("beneficiaryReason").value=b.reason||"";
+ $("beneficiaryNotes").value=b.notes||"";
+ $("beneficiaryFormTitle").textContent="تعديل بيانات المستفيد";
+ $("beneficiaryName").focus();
+};
+window.deleteBeneficiary=async id=>{
+ if(!isAdmin()||!confirm("حذف المستفيد؟ لن يتم حذف سجلات المساعدات تلقائيًا."))return;
+ try{await db.collection("specialBeneficiaries").doc(id).delete()}
+ catch(e){alert("تعذر الحذف: "+e.message)}
+};
+
+function fillRecipientOptions(){
+ const bOpts=beneficiaries.map(b=>`<option value="${esc(b.id)}">${esc(b.name)}</option>`).join("");
+ const fOpts=families.map(f=>`<option value="${esc(f.id)}">${esc(f.familyName)}</option>`).join("");
+ $("aidBeneficiary").innerHTML='<option value="">اختاري المستفيد</option>'+bOpts;
+ updateBlessingRecipients();
+ updateHandoverRecipients();
+}
+function updateBlessingRecipients(){
+ const dept=$("blessingDepartmentForm").value;
+ const options=dept==="families"
+  ?families.map(f=>`<option value="${esc(f.id)}">${esc(f.familyName)}</option>`).join("")
+  :beneficiaries.map(b=>`<option value="${esc(b.id)}">${esc(b.name)}</option>`).join("");
+ $("blessingBeneficiary").innerHTML='<option value="">اختاري المستفيد</option>'+options;
+}
+function updateHandoverRecipients(){
+ const dept=$("handoverDepartment").value;
+ const options=dept==="families"
+  ?families.map(f=>`<option value="${esc(f.id)}">${esc(f.familyName)}</option>`).join("")
+  :beneficiaries.map(b=>`<option value="${esc(b.id)}">${esc(b.name)}</option>`).join("");
+ $("handoverBeneficiary").innerHTML='<option value="">اختاري المستفيد</option>'+options;
+}
+$("blessingDepartmentForm").onchange=updateBlessingRecipients;
+$("handoverDepartment").onchange=updateHandoverRecipients;
+
+function showBeneficiaryHistory(id){
+ const b=beneficiaries.find(x=>x.id===id);if(!b)return;
+ $("aidBeneficiary").value=id;
+ renderBeneficiaryHistory(id);
+}
+window.showBeneficiaryHistory=showBeneficiaryHistory;
+
+function renderBeneficiaryHistory(id=$("aidBeneficiary").value){
+ if(!id){$("beneficiaryAidHistory").innerHTML='<div class="empty">اختاري مستفيدًا لعرض سجله.</div>';return}
+ const rows=aidRecords.filter(a=>a.beneficiaryId===id);
+ $("beneficiaryAidHistory").innerHTML=rows.length?rows.map(a=>`
+  <div class="record">
+   <b>${esc(a.type||"مساعدة")}</b>
+   <div class="meta">التاريخ: ${esc(a.date||"غير محدد")} · المبلغ: ${num(a.amount)} · الكمية: ${esc(a.quantity||"-")}</div>
+   ${a.description?`<div class="meta">${esc(a.description)}</div>`:""}
+   ${canEditService()?`<div class="actions"><button class="btn light" onclick="editAidRecord('${a.id}')">تعديل</button></div>`:""}
+   ${isAdmin()?`<div class="actions"><button class="btn danger" onclick="deleteAidRecord('${a.id}')">حذف</button></div>`:""}
+  </div>
+ `).join(""):'<div class="empty">لا توجد مساعدات مسجلة لهذا المستفيد.</div>';
+}
+$("aidBeneficiary").onchange=()=>renderBeneficiaryHistory();
+
+$("specialAidForm").onsubmit=async e=>{
+ e.preventDefault();if(!canEditService())return;
+ const beneficiaryId=$("aidBeneficiary").value;
+ const type=$("aidType").value.trim(),date=$("aidDate").value;
+ if(!beneficiaryId||!type||!date){msg("aidError","اختاري المستفيد ونوع المساعدة والتاريخ.");return}
+ const data={
+  beneficiaryId,
+  beneficiaryName:beneficiaries.find(b=>b.id===beneficiaryId)?.name||"",
+  type,date,
+  amount:Number($("aidAmount").value||0),
+  quantity:$("aidQuantity").value.trim(),
+  description:$("aidDescription").value.trim(),
+  updatedAt:serverTime(),
+  updatedBy:currentUser.uid
+ };
+ try{
+  data.createdAt=serverTime();data.createdBy=currentUser.uid;
+  await db.collection("specialAidRecords").add(data);
+  $("specialAidForm").reset();$("aidDate").value=today();
+  $("aidBeneficiary").value=beneficiaryId;
+  msg("aidError","تم تسجيل المساعدة بنجاح.",true);
+ }catch(e){msg("aidError","تعذر تسجيل المساعدة: "+e.message)}
+};
+window.editAidRecord=async id=>{
+ if(!canEditService())return;
+ const a=aidRecords.find(x=>x.id===id);if(!a)return;
+ const type=prompt("نوع المساعدة:",a.type||"");
+ if(type===null)return;
+ const amount=prompt("المبلغ:",a.amount||0);
+ if(amount===null)return;
+ const description=prompt("تفاصيل المساعدة:",a.description||"");
+ if(description===null)return;
+ try{
+  await db.collection("specialAidRecords").doc(id).update({
+   type:type.trim(),amount:Number(amount||0),
+   description:description.trim(),updatedAt:serverTime(),
+   updatedBy:currentUser.uid
+  });
+ }catch(e){alert("تعذر تعديل المساعدة: "+e.message)}
+};
+window.deleteAidRecord=async id=>{
+ if(!isAdmin()||!confirm("حذف سجل المساعدة؟"))return;
+ try{await db.collection("specialAidRecords").doc(id).delete()}
+ catch(e){alert("تعذر الحذف: "+e.message)}
+};
+
+/* =========================
+   البركة الشهرية
+========================= */
+
+$("blessingDepartment").onchange=renderBlessings;
+$("blessingMonth").onchange=renderBlessings;
+$("blessingMonthForm").onchange=()=>{$("blessingMonth").value=$("blessingMonthForm").value};
+
+function recipientName(dept,id){
+ if(dept==="families")return families.find(f=>f.id===id)?.familyName||"أسرة غير موجودة";
+ return beneficiaries.find(b=>b.id===id)?.name||"مستفيد غير موجود";
+}
+function renderBlessings(){
+ const dept=$("blessingDepartment").value;
+ const month=$("blessingMonth").value;
+ const rows=blessings.filter(b=>
+  b.department===dept&&(!month||b.month===month)
+ );
+ $("blessingList").innerHTML=rows.length?`
+  <div class="table-wrap"><table>
+   <thead><tr><th>المستفيد</th><th>الشهر</th><th>المبلغ</th><th>الحالة</th><th>التاريخ</th><th>إجراء</th></tr></thead>
+   <tbody>${rows.map(b=>`<tr>
+    <td>${esc(b.recipientName||recipientName(b.department,b.recipientId))}</td>
+    <td>${esc(b.month||"")}</td><td>${num(b.amount)}</td>
+    <td><span class="badge ${b.status==="done"?"done":"pending"}">${b.status==="done"?"تم التسليم":"قيد الانتظار"}</span></td>
+    <td>${esc(b.date||"-")}</td>
+    <td>${canEditService()?`<button class="btn light" onclick="editBlessing('${b.id}')">تعديل</button>`:""}
+    ${isAdmin()?` <button class="btn danger" onclick="deleteBlessing('${b.id}')">حذف</button>`:""}</td>
+   </tr>`).join("")}</tbody>
+  </table></div>`:'<div class="empty">لا توجد سجلات بركة لهذا الشهر والقسم.</div>';
+}
+function resetBlessingForm(){
+ $("blessingForm").reset();$("blessingId").value="";
+ $("blessingMonthForm").value=today().slice(0,7);
+ $("blessingDate").value=today();updateBlessingRecipients();
+ msg("blessingError","");
+}
+$("cancelBlessingBtn").onclick=resetBlessingForm;
+$("blessingForm").onsubmit=async e=>{
+ e.preventDefault();if(!canEditService())return;
+ const department=$("blessingDepartmentForm").value;
+ const recipientId=$("blessingBeneficiary").value;
+ const month=$("blessingMonthForm").value;
+ if(!recipientId||!month){msg("blessingError","اختاري المستفيد والشهر.");return}
+ const data={
+  department,recipientId,
+  recipientName:recipientName(department,recipientId),
+  month,amount:Number($("blessingAmount").value||0),
+  status:$("blessingStatus").value,
+  date:$("blessingDate").value,
+  notes:$("blessingNotes").value.trim(),
+  updatedAt:serverTime(),updatedBy:currentUser.uid
+ };
+ try{
+  const id=$("blessingId").value;
+  if(id)await db.collection("monthlyBlessings").doc(id).update(data);
+  else{
+   data.createdAt=serverTime();data.createdBy=currentUser.uid;
+   await db.collection("monthlyBlessings").add(data);
+  }
+  resetBlessingForm();msg("blessingError","تم حفظ البركة الشهرية.",true);
+ }catch(e){msg("blessingError","تعذر الحفظ: "+e.message)}
+};
+window.editBlessing=id=>{
+ if(!canEditService())return;
+ const b=blessings.find(x=>x.id===id);if(!b)return;
+ $("blessingId").value=id;
+ $("blessingDepartmentForm").value=b.department;
+ updateBlessingRecipients();
+ $("blessingBeneficiary").value=b.recipientId;
+ $("blessingMonthForm").value=b.month||"";
+ $("blessingAmount").value=b.amount||0;
+ $("blessingStatus").value=b.status||"pending";
+ $("blessingDate").value=b.date||"";
+ $("blessingNotes").value=b.notes||"";
+ document.querySelector('[data-page="blessingsPage"]').click();
+};
+window.deleteBlessing=async id=>{
+ if(!isAdmin()||!confirm("حذف سجل البركة الشهرية؟"))return;
+ try{await db.collection("monthlyBlessings").doc(id).delete()}
+ catch(e){alert("تعذر الحذف: "+e.message)}
+};
+/* =========================
+   التسليم اليومي
+========================= */
+
+$("handoverFrom").onchange=renderHandovers;
+$("handoverTo").onchange=renderHandovers;
+$("handoverDepartment").onchange=updateHandoverRecipients;
+
+function renderHandovers(){
+ const from=$("handoverFrom").value;
+ const to=$("handoverTo").value;
+ const rows=handovers.filter(h=>
+  (!from||h.date>=from)&&(!to||h.date<=to)
+ );
+ $("handoverList").innerHTML=rows.length?`
+  <div class="table-wrap"><table>
+   <thead><tr><th>التاريخ</th><th>القسم</th><th>المستفيد</th><th>نوع المساعدة</th><th>المبلغ</th><th>الكمية</th><th>الخادم</th><th>إجراء</th></tr></thead>
+   <tbody>${rows.map(h=>`<tr>
+    <td>${esc(h.date||"")}</td>
+    <td>${h.department==="families"?"الأسر":"المستفيدون"}</td>
+    <td>${esc(h.recipientName||recipientName(h.department,h.recipientId))}</td>
+    <td>${esc(h.type||"")}</td>
+    <td>${num(h.amount)}</td>
+    <td>${esc(h.quantity||"-")}</td>
+    <td>${esc(h.servantName||"-")}</td>
+    <td>${canEditService()?`<button class="btn light" onclick="editHandover('${h.id}')">تعديل</button>`:""}
+    ${isAdmin()?` <button class="btn danger" onclick="deleteHandover('${h.id}')">حذف</button>`:""}</td>
+   </tr>`).join("")}</tbody>
+  </table></div>`:'<div class="empty">لا توجد تسليمات في الفترة المحددة.</div>';
+}
+function resetHandoverForm(){
+ $("handoverForm").reset();$("handoverId").value="";
+ $("handoverDate").value=today();updateHandoverRecipients();
+ msg("handoverError","");
+}
+$("cancelHandoverBtn").onclick=resetHandoverForm;
+
+$("handoverForm").onsubmit=async e=>{
+ e.preventDefault();if(!canEditService())return;
+ const department=$("handoverDepartment").value;
+ const recipientId=$("handoverBeneficiary").value;
+ const date=$("handoverDate").value;
+ const type=$("handoverType").value.trim();
+ const servantName=$("handoverServant").value.trim();
+ if(!recipientId||!date||!type||!servantName){
+  msg("handoverError","أكملي التاريخ والمستفيد ونوع المساعدة واسم الخادم.");return;
+ }
+ const data={
+  date,department,recipientId,
+  recipientName:recipientName(department,recipientId),
+  type,
+  amount:Number($("handoverAmount").value||0),
+  quantity:$("handoverQuantity").value.trim(),
+  description:$("handoverDescription").value.trim(),
+  servantName,
+  updatedAt:serverTime(),
+  updatedBy:currentUser.uid
+ };
+ try{
+  const id=$("handoverId").value;
+  if(id)await db.collection("dailyHandovers").doc(id).update(data);
+  else{
+   data.createdAt=serverTime();data.createdBy=currentUser.uid;
+   await db.collection("dailyHandovers").add(data);
+  }
+  resetHandoverForm();
+  msg("handoverError","تم حفظ التسليم اليومي.",true);
+ }catch(e){msg("handoverError","تعذر حفظ التسليم: "+e.message)}
+};
+
+window.editHandover=id=>{
+ if(!canEditService())return;
+ const h=handovers.find(x=>x.id===id);if(!h)return;
+ $("handoverId").value=id;
+ $("handoverDate").value=h.date||"";
+ $("handoverDepartment").value=h.department||"families";
+ updateHandoverRecipients();
+ $("handoverBeneficiary").value=h.recipientId||"";
+ $("handoverType").value=h.type||"";
+ $("handoverAmount").value=h.amount||0;
+ $("handoverQuantity").value=h.quantity||"";
+ $("handoverServant").value=h.servantName||"";
+ $("handoverDescription").value=h.description||"";
+ document.querySelector('[data-page="handoversPage"]').click();
+};
+window.deleteHandover=async id=>{
+ if(!isAdmin()||!confirm("حذف سجل التسليم؟"))return;
+ try{await db.collection("dailyHandovers").doc(id).delete()}
+ catch(e){alert("تعذر الحذف: "+e.message)}
+};
+
+/* =========================
+   التقارير
+========================= */
+
+let lastReportRows=[];
+$("generateReportBtn").onclick=generateReport;
+
+function generateReport(){
+ if(isStaff())return;
+ const from=$("reportFrom").value;
+ const to=$("reportTo").value;
+ const dept=$("reportDepartment").value;
+
+ if(from&&to&&from>to){
+  $("reportResults").innerHTML='<div class="empty">تاريخ البداية يجب أن يسبق تاريخ النهاية.</div>';
+  return;
+ }
+
+ const inRange=x=>(!from||x>=from)&&(!to||x<=to);
+ const hs=handovers.filter(h=>
+  inRange(h.date||"")&&(dept==="all"||h.department===dept)
+ );
+ const bs=blessings.filter(b=>
+  inRange(b.date||"")&&(dept==="all"||b.department===dept)
+ );
+
+ const totalMoney=hs.reduce((n,x)=>n+Number(x.amount||0),0)+
+  bs.reduce((n,x)=>n+Number(x.amount||0),0);
+ const inKind=hs.filter(x=>!Number(x.amount||0)&&x.quantity).length;
+ const operations=hs.length+bs.length;
+ const people=new Set([
+  ...hs.map(x=>x.department+":"+x.recipientId),
+  ...bs.map(x=>x.department+":"+x.recipientId)
+ ]);
+
+ lastReportRows=[
+  ...hs.map(x=>({
+   date:x.date,department:x.department==="families"?"الأسر":"المستفيدون",
+   recipient:x.recipientName||recipientName(x.department,x.recipientId),
+   type:x.type||"تسليم يومي",amount:Number(x.amount||0),
+   quantity:x.quantity||"",status:"تسليم يومي",
+   servant:x.servantName||""
+  })),
+  ...bs.map(x=>({
+   date:x.date||x.month,department:x.department==="families"?"الأسر":"المستفيدون",
+   recipient:x.recipientName||recipientName(x.department,x.recipientId),
+   type:"البركة الشهرية",amount:Number(x.amount||0),
+   quantity:"",status:x.status==="done"?"تم التسليم":"قيد الانتظار",
+   servant:""
+  }))
+ ].sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+
+ $("reportResults").innerHTML=`
+  <div class="stats">
+   <div class="stat"><small>إجمالي المبالغ</small><strong>${num(totalMoney)}</strong></div>
+   <div class="stat"><small>عدد العمليات</small><strong>${num(operations)}</strong></div>
+   <div class="stat"><small>عدد المستفيدين</small><strong>${num(people.size)}</strong></div>
+   <div class="stat"><small>عمليات المساعدات العينية</small><strong>${num(inKind)}</strong></div>
+  </div>
+  <div class="table-wrap"><table>
+   <thead><tr><th>التاريخ</th><th>القسم</th><th>المستفيد</th><th>النوع</th><th>المبلغ</th><th>الكمية</th><th>الحالة</th><th>الخادم</th></tr></thead>
+   <tbody>${lastReportRows.map(x=>`<tr>
+    <td>${esc(x.date||"")}</td><td>${esc(x.department)}</td>
+    <td>${esc(x.recipient)}</td><td>${esc(x.type)}</td>
+    <td>${num(x.amount)}</td><td>${esc(x.quantity)}</td>
+    <td>${esc(x.status)}</td><td>${esc(x.servant)}</td>
+   </tr>`).join("")}</tbody>
+  </table></div>
+ `;
+}
+$("printReportBtn").onclick=()=>{
+ if(isStaff())return;
+ if(!lastReportRows.length){alert("أنشئي التقرير أولًا.");return}
+ window.print();
+};
+$("exportReportBtn").onclick=()=>{
+ if(isStaff())return;
+ if(!lastReportRows.length){alert("أنشئي التقرير أولًا.");return}
+ const headers=["التاريخ","القسم","المستفيد","النوع","المبلغ","الكمية","الحالة","الخادم"];
+ const rows=lastReportRows.map(x=>[
+  x.date,x.department,x.recipient,x.type,x.amount,x.quantity,x.status,x.servant
+ ]);
+ const csv="\uFEFF"+[headers,...rows].map(r=>
+  r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")
+ ).join("\r\n");
+ const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+ a.href=url;a.download="تقارير-خدمة-ابراهيم.csv";
+ a.click();URL.revokeObjectURL(url);
+};
+
+/* =========================
+   الفروع والخدام
+========================= */
+
+function renderBranches(){
+ if(!isAdmin())return;
+ $("branchList").innerHTML=branches.length?branches.map(b=>{
+  const list=servants.filter(s=>s.branchId===b.id);
+  const count=families.filter(f=>f.branchId===b.id).length;
+  return `<div class="branch-item">
+   <div style="flex:1">
+    <b>${esc(b.name)}</b>
+    <div class="meta">الأسر: ${num(count)} · الخدام: ${num(list.length)}</div>
+    <div>${list.map(s=>`<span class="pill">${esc(s.name)}
+     <button class="btn light" style="padding:1px 5px" onclick="renameServant('${s.id}')">✎</button></span>`).join("")}</div>
+    <div class="row" style="margin-top:8px">
+     <input id="servantName-${b.id}" placeholder="اسم خادم جديد">
+     <button class="btn" onclick="addServant('${b.id}')">+ إضافة خادم</button>
+    </div>
+   </div>
+   <button class="btn light" onclick="renameBranch('${b.id}')">تعديل الفرع</button>
+  </div>`;
+ }).join(""):'<div class="empty">لا توجد فروع.</div>';
+
+ $("branchServantStats").innerHTML=branches.map(b=>{
+  const list=servants.filter(s=>s.branchId===b.id);
+  return `<div class="record"><b>${esc(b.name)}</b>
+   <div class="stat-grid">
+    <div class="small-stat">عدد الأسر<b>${num(families.filter(f=>f.branchId===b.id).length)}</b></div>
+    <div class="small-stat">عدد الخدام<b>${num(list.length)}</b></div>
+   </div>
+   ${list.map(s=>`<div class="meta">${esc(s.name)} — مسؤول عن ${num(families.filter(f=>(f.servantIds||[]).includes(s.id)).length)} أسرة</div>`).join("")}
+  </div>`;
+ }).join("");
+}
+$("addBranchBtn").onclick=async()=>{
+ if(!isAdmin())return;
+ const name=$("newBranchName").value.trim();
+ if(!name){msg("branchError","اكتبي اسم الفرع.");return}
+ if(branches.some(b=>(b.name||"").toLowerCase()===name.toLowerCase())){
+  msg("branchError","اسم الفرع موجود بالفعل.");return;
+ }
+ try{
+  await db.collection("branches").add({
+   name,createdAt:serverTime(),createdBy:currentUser.uid
+  });
+  $("newBranchName").value="";
+  msg("branchError","تمت إضافة الفرع.",true);
+ }catch(e){msg("branchError","تعذرت إضافة الفرع: "+e.message)}
+};
+window.addServant=async branchId=>{
+ if(!isAdmin())return;
+ const input=$("servantName-"+branchId);
+ const name=input.value.trim();
+ if(!name){alert("اكتبي اسم الخادم.");return}
+ if(servants.some(s=>s.branchId===branchId&&(s.name||"").toLowerCase()===name.toLowerCase())){
+  alert("اسم الخادم موجود بالفعل في هذا الفرع.");return;
+ }
+ try{
+  await db.collection("servants").add({
+   name,branchId,createdAt:serverTime(),createdBy:currentUser.uid
+  });
+  input.value="";
+ }catch(e){alert("تعذرت إضافة الخادم: "+e.message)}
+};
+window.renameBranch=async id=>{
+ if(!isAdmin())return;
+ const b=branches.find(x=>x.id===id);if(!b)return;
+ const name=prompt("اسم الفرع الجديد:",b.name);
+ if(name===null)return;
+ const clean=name.trim();if(!clean){alert("الاسم مطلوب.");return}
+ try{
+  await db.collection("branches").doc(id).update({name:clean,updatedAt:serverTime()});
+  const batch=db.batch();
+  families.filter(f=>f.branchId===id).forEach(f=>{
+   batch.update(db.collection("families").doc(f.id),{branchName:clean});
+  });
+  if(families.some(f=>f.branchId===id))await batch.commit();
+ }catch(e){alert("تعذر تعديل الفرع: "+e.message)}
+};
+window.renameServant=async id=>{
+ if(!isAdmin())return;
+ const s=servants.find(x=>x.id===id);if(!s)return;
+ const name=prompt("اسم الخادم الجديد:",s.name);
+ if(name===null)return;
+ const clean=name.trim();if(!clean){alert("الاسم مطلوب.");return}
+ try{
+  await db.collection("servants").doc(id).update({name:clean,updatedAt:serverTime()});
+  const batch=db.batch();
+  families.filter(f=>(f.servantIds||[]).includes(id)).forEach(f=>{
+   const names=(f.servantIds||[]).map(sid=>
+    sid===id?clean:(servants.find(x=>x.id===sid)?.name||"")
+   );
+   batch.update(db.collection("families").doc(f.id),{servantNames:names});
+  });
+  if(families.some(f=>(f.servantIds||[]).includes(id)))await batch.commit();
+ }catch(e){alert("تعذر تعديل الخادم: "+e.message)}
+};
+
+/* تحديث قوائم المستفيدين عند تحميل الأسر */
+const oldFillRecipientOptions=fillRecipientOptions;
+fillRecipientOptions=function(){
+ const aid=$("aidBeneficiary").value;
+ oldFillRecipientOptions();
+ $("aidBeneficiary").value=aid;
+};
+const oldRender=render;
+render=function(){
+ oldRender();
+ fillRecipientOptions();
+};
+
+/* تهيئة أولية */
+$("aidDate").value=today();
+$("handoverDate").value=today();
+$("blessingDate").value=today();
+$("blessingMonth").value=today().slice(0,7);
+$("blessingMonthForm").value=today().slice(0,7);
 init();
-resetForm();
 </script>
 </body>
 </html>
